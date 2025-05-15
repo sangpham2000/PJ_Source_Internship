@@ -1,0 +1,124 @@
+﻿@using PJ_Source_GV.Caption
+@using System.Security.Claims;
+
+@{
+   
+}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-blue">
+            <div class="panel-heading">@ViewData["Title"]</div>
+            <div class="panel-body pan">
+                <form id="frmEditGroup">
+                    <div class="form-body pal">
+                        <br />
+                        <input class="hidden" id="group_id" name="id" value="@ViewData["Page_id"]" />
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="name">@SharedLocalizer["Name"]</label>
+                                    <div class="controls">
+                                        <input id="name" name="name" class="form-control" type="text" value='' />
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        sang
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="name">@SharedLocalizer["Alias"]</label>
+                                    <div class="controls">
+                                        <input id="alias" name="alias" class="form-control" type="text" value='' />
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="name">@SharedLocalizer["Permission"]</label>
+                                    <div class="controls">
+                                        <input id="permission" name="permission" class="form-control" type="text" value='' />
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="description">@SharedLocalizer["Note"]</label>
+                                    <div class="controls">
+                                        <textarea class="editor form-control" id="note" name="note" style="height: 200px"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions text-right pal">
+                            <button type="submit" id="btnSave" class="btn btn-primary">@SharedLocalizer["Save"]</button>&nbsp;
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    if ($('#group_id').val() !== 0) {
+        var group = GetGroupByID($('#group_id').val());
+        $('#name').val(group.name);
+        $('#note').val(group.note);
+        $('#permission').val(group.permission);
+        $('#alias').val(group.alias);
+    }
+    function GetGroupByID(id) {
+        var item;
+        $.ajax({
+            url: "/API/Page/GetPage",
+            data: {
+                id: id
+            },
+            async: false,
+            success: function (i, result) {
+                item = i;
+            }
+        });
+        return item;
+    }
+
+    $('#frmEditGroup').submit(function () {
+        event.preventDefault();
+        var form = $('#frmEditGroup').serialize();
+        var groupID = $('#group_id').val();
+        if (groupID !== "0") {
+            $.ajax({
+                url: "/API/Page/UpdatePage",
+                type: "post",
+                data: form,
+                dataType: 'json',
+                success: function (data) {
+                    window.location.href = "/page";
+                }
+            });
+        }
+        else {
+            $.ajax({
+                url: "/API/Page/InsertPage/",
+                type: "post",
+                data: form,
+                dataType: 'json',
+                success: function (data) {
+                    window.location.href = "/page";
+                }
+            });
+        }
+    });
+</script>

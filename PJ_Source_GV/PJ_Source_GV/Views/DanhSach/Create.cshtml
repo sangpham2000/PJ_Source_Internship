@@ -1,0 +1,115 @@
+﻿
+@using PJ_Source_GV.FunctionSupport
+@using Microsoft.AspNetCore.Builder
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
+@using Microsoft.AspNetCore.Mvc.Localization
+@using System.Security.Claims;
+@inject IOptions<RequestLocalizationOptions> LocOptions
+@inject IHtmlLocalizer<SharedResources> SharedLocalizer
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body pan">
+                <form action="#" method="post" id="frmCreate" class="form-horizontal" enctype="multipart/form-data">
+                    <div class="form-body pal">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label">
+                                        @SharedLocalizer["SoVanBan"]
+                                        <span class='require'>*</span>
+                                    </label>
+                                    <div class="col-md-8">
+                                        <input id="SoVanBan" name="SoVanBan" type="text" class="form-control" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label">
+                                        @SharedLocalizer["TenVanBan"]
+                                        <span class='require'>*</span>
+                                    </label>
+                                    <div class="col-md-8">
+                                        <input id="TenVanBan" name="TenVanBan" type="text" class="form-control" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="col-md-4 control-label">
+                                        @SharedLocalizer["LoaiVanBan"]
+                                        <span class='require'>*</span>
+                                    </label>
+                                    <div class="col-md-8">
+                                        <select id="LoaiVanBan" name="LoaiVanBan" class="selectpicker form-control" title="Nothing Selected" data-style="btn-white" required
+                                                data-live-search="true" asp-items="@ViewBag.ListLoaiQuyetDinh"></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <div class="col-md-12">
+                            <div class="pull-right">
+                                <button type="submit" form="frmCreate" id="btnCreate" class="btn btn-green">@SharedLocalizer["Add"]</button> &nbsp;
+                                <a class="btn btn-primary" href="/danhsach">
+                                    @SharedLocalizer["Cancel"]
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var lang = "@requestCulture.RequestCulture.UICulture.Name";
+        var dialog = bootbox.dialog({
+            message: '<p class="text-center mb-0"><i class="fa fa-spin fa-cog"></i> Loading...</p>',
+            closeButton: false,
+            size: 'small'
+        });
+        dialog.modal('hide');
+
+        $("#frmCreate").on("submit", function (e) {
+            e.preventDefault();
+            if (!confirm("@SharedLocalizer["Confirm"]"))
+            {
+                return;
+            }
+            var data = new FormData($("#frmCreate")[0]);
+            $.ajax({
+                url: '/DanhSach/Create',
+                method: 'POST',
+                data: data,
+                contentType: false,
+                cache: false,
+                processData: false,
+                error: function (data) {
+                    dialog.modal('hide');
+                    var error = bootbox.dialog({
+                        message: '<div class="text-center">Sorry, Something went wrong!</div>',
+                        closeButton: false,
+                        size: 'small'
+                    });
+                    setTimeout(function () { error.modal('hide'); }, 3000);
+                },
+                success: function (data) {
+                    dialog.modal('hide');
+                    $.scojs_message('@SharedLocalizer["CreateSuccess"]', $.scojs_message.TYPE_OK);
+                    setTimeout(function () { window.location.href = "/danhsach"; }, 3000);
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,93 @@
+﻿@using PJ_Source_GV.Areas.API.Models
+@using PJ_Source_GV.Caption
+@using System.Security.Claims;
+@model List<Page>
+
+@{
+   
+}
+
+<div class="row">
+    <div class="portlet box portlet-white">
+        <div class="portlet-header">
+            <a class="pull-right btn btn-success" href="/page/edit?id=0">
+                <i class="fa fa-plus"></i> @SharedLocalizer["Add"]
+            </a>
+        </div>
+        <div class="portlet-body">
+            <div id="home">
+                <table class="table table-bordered display nowrap" style="width:100%" id="danhSach">
+                    <thead style="background-color: #0061AD;color:white;">
+                        <tr role="row">
+                            <th>@SharedLocalizer["STT"]</th>
+                            <th>@SharedLocalizer["Name"]</th>
+                            <th>@SharedLocalizer["Alias"]</th>
+                            <th>@SharedLocalizer["Permission"]</th>
+                            <th>@SharedLocalizer["Note"]</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var stt = 0;}
+                        @foreach (Page row in Model)
+                        {
+                            stt++;
+                            <tr>
+                                <td>
+                                    @stt
+                                </td>
+                                <td>
+                                    @row.name
+                                </td>
+                                <td>
+                                    @row.alias
+                                </td>
+                                <td>
+                                    @row.permission
+                                </td>
+                                <td>
+                                    @row.note
+                                </td>
+                                <td class="" style="text-align:right">
+                                    @if (User.IsInRole("page_update"))
+                                    {
+                                        <a class="confirm-edit" id="update" title="@SharedLocalizer["Update"]" href="/page/edit?id=@row.id"><i class="fa-lg btn-control fa fa-pencil-square-o"></i></a>
+                                    }
+                                    @if (User.IsInRole("page_delete"))
+                                    {
+                                        <a class="confirm-delete" title="@SharedLocalizer["Delete"]" data-title="@row.name" data-id="@row.id">&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa-lg btn-control fa fa-trash-o"></i></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var table = $('#danhSach').DataTable();
+    });
+
+    $(document).on("click", ".confirm-delete", function () {
+        var title = $(this).attr("data-title");
+        var id = $(this).attr("data-id");
+        if (confirm("@SharedLocalizer["DeleteConfirm"]")) {
+            $.ajax({
+                url: "/API/Page/DeletePage",
+                type: "post",
+                dataType: 'json',
+                data: {
+                    id: id
+                },
+                success: function (result) {
+                    window.location.reload();
+                }
+            });
+        }
+    });
+</script>
+

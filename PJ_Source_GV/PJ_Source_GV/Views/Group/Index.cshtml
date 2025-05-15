@@ -1,0 +1,97 @@
+﻿@using PJ_Source_GV.Areas.API.Models
+@using PJ_Source_GV.Caption
+@using System.Security.Claims;
+@model List<Group>
+
+@{
+   
+}
+
+<div class="row">
+    <div class="portlet box portlet-white">
+        <div class="portlet-header">
+            <a class="pull-right btn btn-success" href="/group/edit?id=0">
+                <i class="fa fa-plus"></i> @SharedLocalizer["Add"]
+            </a>
+        </div>
+        <div class="portlet-body">
+            <div id="home">
+                <table class="table table-bordered display nowrap" style="width:100%" id="danhSach">
+                    <thead style="background-color: #0061AD;color:white;">
+                        <tr role="row">
+                            <th>@SharedLocalizer["STT"]</th>
+                            <th>@SharedLocalizer["Name"]</th>
+                            <th>@SharedLocalizer["Note"]</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var stt = 0;}
+                        @foreach (Group row in Model)
+                        {
+                            if (User.IsInRole("group_view"))
+                            {
+                                stt++;
+                                <tr>
+                                    <td>
+                                        @stt
+                                    </td>
+                                    <td>
+                                        @row.name
+                                    </td>
+                                    <td>
+                                        @row.note
+                                    </td>
+                                    <td>
+                                        <a href="/group/member?id=@row.id">@SharedLocalizer["MemberofGroupForm"]</a>
+                                    </td>
+                                    <td>
+                                        <a href="/group/permission?id=@row.id">@SharedLocalizer["PermissionofGroupForm"]</a>
+                                    </td>
+                                    <td>
+                                        @if (User.IsInRole("group_update"))
+                                        {
+                                            <a class="confirm-edit" id="update" title="@SharedLocalizer["Update"]" href="/group/edit?id=@row.id"><i class="fa-lg btn-control fa fa-pencil-square-o"></i></a>
+                                        }
+                                        @if (User.IsInRole("group_delete"))
+                                        {
+                                            <a class="confirm-delete" title="@SharedLocalizer["Delete"]" data-title="@row.name" data-id="@row.id">&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa-lg btn-control fa fa-trash-o"></i></a>
+                                        }
+                                    </td>
+
+                                </tr>
+                            }
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var table = $('#danhSach').DataTable();
+    });
+
+    $(document).on("click", ".confirm-delete", function () {
+        var title = $(this).attr("data-title");
+        var id = $(this).attr("data-id");
+        if (confirm("@SharedLocalizer["DeleteConfirm"]")) {
+            $.ajax({
+                url: "/API/Group/DeleteGroup",
+                type: "post",
+                dataType: 'json',
+                data: {
+                    id: id
+                },
+                success: function (result) {
+                    window.location.reload();
+                }
+            });
+        }
+    });
+</script>

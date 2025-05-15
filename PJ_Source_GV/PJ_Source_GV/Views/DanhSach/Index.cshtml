@@ -1,0 +1,251 @@
+﻿<div class="form-horizontal">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="portlet box portlet-default">
+                <div class="portlet-body">
+                    <form id="frmFilter" method="post">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-3">
+                                    <label class="control-label"><strong>@SharedLocalizer["NgayBanHanh"]:</strong></label>
+                                </div>
+                                <div class="col-md-9 form-group">
+                                    <label class="col-md-2 control-label">@SharedLocalizer["TuNgay"]</label>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <input type="text" id="NgayBanHanh_TuNgay" name="NgayBanHanh_TuNgay" data-date-format="dd/mm/yyyy" value=""
+                                                   class="datepicker-default form-control required" />
+                                            <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                    <label class="col-md-2 control-label">@SharedLocalizer["DenNgay"]</label>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <input type="text" id="NgayBanHanh_DenNgay" name="NgayBanHanh_DenNgay" data-date-format="dd/mm/yyyy" value=""
+                                                   class="datepicker-default form-control required" />
+                                            <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-3">
+                                    <label class="control-label"><strong>@SharedLocalizer["NgayTao"]:</strong></label>
+                                </div>
+                                <div class="col-md-9 form-group">
+                                    <label class="col-md-2 control-label">@SharedLocalizer["TuNgay"]</label>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <input type="text" id="NgayTao_TuNgay" name="NgayTao_TuNgay" data-date-format="dd/mm/yyyy" value=""
+                                                   class="datepicker-default form-control required" />
+                                            <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                    <label class="col-md-2 control-label">@SharedLocalizer["DenNgay"]</label>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <input type="text" id="NgayTao_DenNgay" name="NgayTao_DenNgay" data-date-format="dd/mm/yyyy" value=""
+                                                   class="datepicker-default form-control required" />
+                                            <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-3">
+                                    <label class="control-label"><strong>@SharedLocalizer["NoiDung"]:</strong></label>
+                                </div>
+                                <div class="col-md-9 form-group">
+                                    <label class="col-md-2 control-label">@SharedLocalizer["SoVanBan"]</label>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <input type="text" id="SoVanBan" name="SoVanBan"
+                                                   class="form-control" />
+                                        </div>
+                                    </div>
+                                    <label class="col-md-2 control-label">@SharedLocalizer["TrichYeu"]</label>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <input type="text" id="NoiDung" name="NoiDung"
+                                                   class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right col-md-12">
+                                <button type="button" id="btnFilter" class="btn btn-success">@SharedLocalizer["TimKiem"]</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet box">
+            <div class="portlet-header">
+                <div class="btn-group">
+                    <div class="btn btn-white">
+                        <input type="checkbox"
+                               style="margin: 0; vertical-align: middle;"
+                               class="checkall" />
+                    </div>
+                    <button type="button" data-toggle="dropdown" class="btn btn-white dropdown-toggle">
+                        <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul role="menu" class="dropdown-menu">
+                        <li><a href="#" class="markAsRead">@SharedLocalizer["DanhDauDaDoc"]</a></li>
+                        <li><a href="#" class="markAsUnRead">@SharedLocalizer["DanhDauChuaDoc"]</a></li>
+                    </ul>
+                </div>
+                <button id="RefreshButton" type="button" data-toggle="tooltip" title="Refresh" class="btn btn-white mls mrs">
+                    <span class="glyphicon glyphicon-refresh"></span>
+                </button>
+                <div class="pull-right">
+                    <a href="/danhsach/create" title="Refresh" class="btn btn-success mls mrs">
+                        <span class="fa fa-plus"></span>&nbsp;@SharedLocalizer["Add"]
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div id="home">
+                    <table class="table table-bordered display">
+                        <thead style="background-color: #0061AD;color:white;">
+                            <tr>
+                                <th></th>
+                                <th>@SharedLocalizer["PhongBan"]</th>
+                                <th>@SharedLocalizer["SoVanBan"]</th>
+                                <th>@SharedLocalizer["LoaiVanBan"]</th>
+                                <th>@SharedLocalizer["TenVanBan"]</th>
+                                <th>@SharedLocalizer["NgayCapNhat"]</th>
+                                <th>@SharedLocalizer["ThaoTac"]</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var dialog = bootbox.dialog({
+            message: '<p class="text-center mb-0"><i class="fa fa-spin fa-cog"></i> Loading...</p>',
+            closeButton: false,
+            size: 'small'
+        });
+
+        var table = $('table').DataTable({
+            stripeClasses: false,
+            orderClasses: false,
+            serverSide: true,
+            dom: "lBfrtip",
+            ajax: function (data, callback, settings) {
+                data.sort = data.columns[data.order[0]["column"]]["data"];
+                dialog.modal('show');
+                $.ajax({
+                    url: '/DanhSach/GetDuLieu',
+                    method: 'POST',
+                    data: data,
+                    success: function (result) {
+                        dialog.modal('hide');
+                        if (result === "Failed To Query") {
+                            $.scojs_message('@SharedLocalizer["ForbiddenError"]', $.scojs_message.TYPE_ERROR);
+                        }
+                    },
+                    error: function (result) {
+                        dialog.modal('hide');
+                        $.scojs_message('@SharedLocalizer["ForbiddenError"]', $.scojs_message.TYPE_ERROR);
+                    }
+                }).done(callback);
+            },
+            columns: [
+                {
+                    "data": "ID",
+                    "render": function (data, type, row) {
+                        var html = "<input type=\"checkbox\" value=\"" + data + "\" />";
+                        var $select = $(html);
+
+                        return $select[0].outerHTML;
+                    }
+                },
+                { "data": "TenPhongBan" },
+                { "data": "SoVanBan" },
+                { "data": "TenLoaiVanBan" },
+                { "data": "TenVanBan" },
+                {
+                    "data": "NgayCapNhat",
+                    "render": function (data) {
+                        var date = new Date(data);
+                        return date.toLocaleDateString("vi");
+                    }
+                },
+                {
+                    "data": "ID",
+                    "render": function (data, type, row) {
+                        var html = "";
+                        html += '<a href="/danhsach/edit/' + data + '" target="_blank" class="btn btn-info btn-xs">@SharedLocalizer["Edit"]</a>';
+                        html += '&nbsp;<button id="DeleteID-' + data + '" class="btn btn-primary btn-xs">@SharedLocalizer["Delete"]</button>';
+
+                        return html;
+                    }
+                },
+
+            ],
+            createdRow: function (row, data, dataIndex) {
+                if (!data.IsDaXem) {
+                    $(row).addClass('unread');
+                }
+            },
+            order: [[5, "desc"]],
+            drawCallback: function () {
+                $('input[type="checkbox"]:not(".switch"):not(".checkall")').iCheck({
+                    checkboxClass: 'icheckbox_minimal-grey',
+                    increaseArea: '20%' // optional
+                });
+                if ($("table").parent('#table-responsive').length == 0) {
+                    $("table").wrap('<div id="table-responsive" style="overflow: auto !important; width: 100%;"></div>');
+                }
+            }
+        });
+
+        
+        $(document).on('click', 'button[id^="DeleteID-"]', function () {
+            var id = $(this).attr('id').split('-')[1];
+            var confirmDelete = confirm("@SharedLocalizer["DeleteConfirm"]");
+            if (!confirmDelete) {
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "/DanhSach/Delete",
+                cache: false,
+                data: { ID: id },
+                success: function (result) {
+                if (result === true) {
+                    $.scojs_message('@SharedLocalizer["DeleteSuccess"]', $.scojs_message.TYPE_OK);
+                    table.ajax.reload(null, false);
+                }
+                else {
+                    $.scojs_message(result.message, $.scojs_message.TYPE_ERROR);
+                }
+                },
+                error: function (result) {
+                    $.scojs_message('@SharedLocalizer["ForbiddenError"]', $.scojs_message.TYPE_ERROR);
+                }
+            });
+        });
+
+        $('#RefreshButton').click(function () {
+            dialog.modal('show');
+            table.ajax.reload(null, false); // user paging is not reset on reload
+        });
+
+    });
+</script>

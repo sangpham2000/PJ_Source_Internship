@@ -1,0 +1,7 @@
+
+/PJ_Source_GV/bin
+/PJ_Source_GV/obj
+*.user
+/.vs
+*.pdb
+.idea/

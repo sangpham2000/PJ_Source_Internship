@@ -1,0 +1,96 @@
+﻿@using PJ_Source_GV.Areas.API.Models
+@using PJ_Source_GV.Caption
+@using System.Security.Claims;
+
+@{
+   
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-blue">
+            <div class="panel-heading">@ViewData["title"]</div>
+            <div class="panel-body pan">
+                <form id="frmEditGroup">
+                    <div class="form-body pal">
+                        <input class="hide" id="group_id" name="id" value="@ViewData["group_id"]" />
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="name">@SharedLocalizer["Name"]</label>
+                                    <div class="controls">
+                                        <input id="name" name="name" class="form-control" type="text" value='' />
+                                        <span class="help-block"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="description">@SharedLocalizer["Note"]</label>
+                                    <div class="controls">
+                                        <textarea class="editor form-control" id="note" name="note" style="height: 200px"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions text-right pal">
+                        <button type="submit" id="btnSave" class="btn btn-primary">@SharedLocalizer["Save"]</button>&nbsp;
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    if ($('#group_id').val() !== 0) {
+        var group = GetGroupByID($('#group_id').val());
+        $('#name').val(group.name);
+        $('#note').val(group.note);
+    }
+    function GetGroupByID(id) {
+        var item;
+        $.ajax({
+            url: "/API/Group/GetGroup/",
+            data: {
+                id: id
+            },
+            async: false,
+            success: function (i, result) {
+                item = i;
+            }
+        });
+        return item;
+    }
+
+    $('#frmEditGroup').submit(function () {
+        event.preventDefault();
+        var form = $('#frmEditGroup').serialize();
+        var groupID = $('#group_id').val();
+        if (groupID !== "0") {
+            $.ajax({
+                url: "/API/Group/UpdateGroup/",
+                type: "post",
+                data: form,
+                dataType: 'json',
+                success: function (data) {
+                    window.location.href = "/group";
+                }
+            });
+        }
+        else {
+            $.ajax({
+                url: "/API/Group/InsertGroup/",
+                type: "post",
+                data: form,
+                dataType: 'json',
+                success: function (data) {
+                    window.location.href = "/group";
+                }
+            });
+        }
+    });
+</script>

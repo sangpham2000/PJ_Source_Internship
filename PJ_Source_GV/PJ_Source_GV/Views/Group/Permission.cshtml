@@ -1,0 +1,230 @@
+﻿@using PJ_Source_GV.Areas.API.Models
+@using PJ_Source_GV.Caption
+@using System.Security.Claims;
+
+@{
+   
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-blue">
+            <div class="panel-heading">@ViewData["title"]</div>
+            <div class="panel-body pan">
+                <form action="#" class="form-horizontal form-seperated mbl">
+                    <div class="form-body">
+                        <input class="hide" id="group_id" name="id" value='@ViewData["group_id"]' />
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">@SharedLocalizer["Page"]: </label>
+                            <div class="col-md-6">
+                                <select id="selPage" name="selPage" class="selectpicker form-control">
+                                    @{
+                                        var tontai = 0;
+                                        foreach (var p in ViewData["page"] as List<Page>)
+                                        {
+                                            tontai = 0;
+                                            if (p.alias == "page")
+                                            {
+                                                if (User.IsInRole("page_view"))
+                                                {
+                                                    foreach (var item in ViewData["permissions"] as List<Permission>)
+                                                    {
+                                                        if (p.id == item.page_id)
+                                                        {
+                                                            tontai = 1;
+                                                        }
+                                                    }
+                                                    if (tontai == 0)
+                                                    {
+                                                        <option value="@p.id">@p.name</option>}
+                                                }
+
+                                            }
+                                            else
+                                            {
+                                                foreach (var item in ViewData["permissions"] as List<Permission>)
+                                                {
+                                                    if (p.id == item.page_id)
+                                                    {
+                                                        tontai = 1;
+                                                    }
+                                                }
+                                                if (tontai == 0)
+                                                {
+                                                    <option value="@p.id">@p.name</option>}
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button id="btnSave" type="button" class="btn btn-primary">@SharedLocalizer["Save"]</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <table class="table table-bordered display" id="danhSach" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th hidden></th>
+                                            <th hidden></th>
+                                            <th hidden></th>
+                                            <th hidden></th>
+                                            <th></th>
+                                            @foreach (var func in ViewData["functions"] as Dictionary<string, int>)
+                                            {
+                                                <th>@func.Key</th>
+                                            }
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="permission_body">
+                                        @foreach (var permission in ViewData["permissions"] as List<Permission>)
+                                        {
+                                            int per = permission.permission;
+                                            <tr>
+                                                <td hidden>@permission.id</td>
+                                                <td hidden id="group_@(permission.id)">@permission.group_id</td>
+                                                <td hidden id="page_@(permission.id)">@permission.page_id</td>
+                                                <td hidden id="per_@(permission.id)">@permission.permission</td>
+                                                <td><b>@permission.page_name</b></td>
+                                                @foreach (var func in ViewData["functions"] as Dictionary<string, int>)
+                                                {
+                                                    var code = func.Value;
+                                                    foreach (var page in ViewData["page"] as List<Page>)
+                                                    {
+                                                        if (page.id == permission.page_id)
+                                                        {
+                                                            if ((code & page.permission) != code)
+                                                            {
+                                                                <td>
+                                                                    <div class="controls">
+                                                                        <input class="@func.Key" name="@func.Key" value="@func.Value" type="checkbox" disabled>
+                                                                    </div>
+                                                                </td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>
+                                                                    <div class="controls" data-title="@(permission.id.ToString()+'-'+func.Value.ToString())">
+                                                                        <input class="@func.Key" name="@func.Key" value="@func.Value" type="checkbox">
+                                                                    </div>
+                                                                </td>
+                                                            }
+                                                        }
+
+                                                    }
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var table = $('#danhSach').DataTable({
+            ordering: false,
+            paging: false,
+            dom: "t"
+        });
+    });
+
+
+    $(document).ready(function () {
+        // check permission when page load
+        var theBody = $('#permission_body').children();
+        for (var r = 0; r < theBody.length; r++) {
+            var theTR = $(theBody[r]);
+            if (theTR.children().length > 4) {
+                var per = theTR.children()[3].textContent;
+                for (var i = 11; i > 4; i--) {
+                    var tdVal = theTR.children()[i].children[0].children[0].children[0].getAttribute('value');
+                    if (per - tdVal >= 0) {
+                        var ischeck = theTR.children()[i].children[0].children[0];
+                        $(ischeck).iCheck('check');
+                        $(ischeck).iCheck('update');
+                        per -= tdVal;
+                    }
+                }
+            }
+        }
+
+
+        $(document).on('ifChecked', '#permission_body input[type="checkbox"]', function () {
+            var arr = $(this).parent().parent().data('title').split('-');
+            //var theTR = $(this).parent().parent().parent();
+            var id = arr[0];
+            var permission = arr[1];
+            var group_id = $("#group_" + id.toString()).text();
+            var page_id = $("#page_" + id.toString()).text();
+            //var newPermission;
+            permission = Number($("#per_" + id.toString()).text()) + Number($(this).val());
+            $("#per_" + id).html(permission);
+
+            $(this).iCheck('check');
+            $(this).iCheck('update');
+            LuuQuyen(id, group_id, page_id, permission);
+        });
+
+        $(document).on('ifUnchecked', '#permission_body input[type="checkbox"]', function () {
+            var arr = $(this).parent().parent().data('title').split('-');
+            var id = arr[0];
+            var permission = arr[1];
+            var group_id = $("#group_" + id.toString()).text();
+            var page_id = $("#page_" + id.toString()).text();
+            permission = Number($("#per_" + id.toString()).text()) - Number($(this).val());
+            $("#per_" + id).html(permission);
+            $(this).iCheck('uncheck');
+            $(this).iCheck('update');
+            LuuQuyen(id, group_id, page_id, permission);
+        });
+
+        $('#btnSave').click(function () {
+            var group_id = $('#group_id').val();
+            var page_id = $('#selPage').val();
+            var permission = 0;
+            $.ajax({
+                type: "post",
+                url: "/group/insert",
+                data: {
+                    group_id: group_id,
+                    page_id: page_id,
+                    permission: permission
+                },
+                success: function (result) {
+                    if (result === "Exists") {
+                        alert("@SharedLocalizer["ExistedError"]");
+                        return;
+                    }
+                    window.location.reload();
+                }
+            });
+        });
+    });
+    function LuuQuyen(id, groupid, pageid, per) {
+        $.ajax({
+            type: "post",
+            async: false,
+            url: "/API/Group/UpdatePermission",
+            data: {
+                id: id,
+                group_id: groupid,
+                page_id: pageid,
+                permission: per
+            },
+            success: function (result) {
+                toastr.success("Save data success");
+            }
+        });
+    }
+</script>
+

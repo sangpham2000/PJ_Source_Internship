@@ -1,0 +1,32 @@
+@using PJ_Source_GV.FunctionSupport
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Localization
+@using System.Security.Claims;
+@inject IViewLocalizer Localizer
+
+@{
+Layout = "_StudentLayout";
+var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+}
+
+<div class="wrapper wrapper-content animated fadeInRight" id="app">
+    <app-container></app-container>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+
+<!-- Component Scripts -->
+<script src="~/js/createTable/components/AppContainer.js"></script>
+<script src="~/js/createTable/components/StandardsList.js"></script>
+<script src="~/js/createTable/components/StandardCard.js"></script>
+<script src="~/js/createTable/components/StandardEditor.js"></script>
+<script src="~/js/createTable/components/TableEditor.js"></script>
+<script src="~/js/createTable/components/ColumnList.js"></script>
+<script src="~/js/createTable/components/ModalCreateStandard.js"></script>
+<script src="~/js/createTable/components/ModalAddTable.js"></script>
+<script src="~/js/createTable/components/ModalEditColumn.js"></script>
+
+<script src="~/js/createTable/main.js"></script>
+
+<link type="text/css" rel="stylesheet" href="~/js/createTable/main.css" />

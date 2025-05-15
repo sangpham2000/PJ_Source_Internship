@@ -1,0 +1,126 @@
+﻿.quickSearchBg {
+    background-color: rgba(255, 255, 255, 0.1) !important
+}
+
+.nav .nav-link.active {
+    i {
+        color: #0067ac;
+    }
+}
+
+.overflowTextLine1 {
+    display: block;
+    display: -webkit-box;
+    max-width: 100%;
+    height: 1.5em;
+    margin: 0 auto;
+    font-size: 14px;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.overflowTextLine2 {
+    display: block;
+    display: -webkit-box;
+    max-width: 100%;
+    height: 3em;
+    margin: 0 auto;
+    font-size: 14px;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.overflowTextLine3 {
+    display: block;
+    display: -webkit-box;
+    max-width: 100%;
+    height: 4.4em;
+    margin: 0 auto;
+    font-size: 14px;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.ckEditCustom {
+    .cke_1 {
+        border: unset;
+
+        .cke_top {
+            border-radius: 0.42rem 0.42rem 0 0;
+            border-bottom: unset;
+        }
+
+        .cke_contents {
+            border: 1px solid #E4E6EF;
+        }
+
+        .cke_bottom {
+            border-radius: 0 0 0.42rem 0.42rem;
+            border-top: unset;
+        }
+
+        &.is-invalid {
+            .cke_top {
+                border: 1px solid #F64E60;
+                border-bottom: unset;
+            }
+
+            .cke_contents {
+                border: 1px solid #F64E60;
+            }
+
+            .cke_bottom {
+                border: 1px solid #F64E60;
+                border-top: unset;
+            }
+        }
+    }
+}
+
+#contentViewContent{
+    img{
+        max-width: 100%;
+        height:auto !important;
+    }
+}
+
+.scrollTop {
+    position: fixed;
+    transition: background-color .3s, opacity .5s, visibility .5s;
+    opacity: 0;
+    visibility: hidden;
+    bottom: 1rem;
+    right: 1rem;
+
+    &.show{
+        visibility: visible;
+        opacity: 1;
+    }
+}
+
+.scroll.ps{
+    .ps__rail-x {
+        .ps__thumb-x {
+            background-color: #0067ac;
+        }
+    }
+}
+
+.bg-red {
+    background-color: var(--red) !important;
+}
+
+.animation-zoom {
+    transition: transform .2s;
+
+    &:hover {
+        transform: scale(1.1);
+    }
+}

@@ -1,0 +1,105 @@
+body {
+  font-family: "Nunito", sans-serif;
+  background-color: #f7f9fb;
+  color: #333;
+  padding-top: 70px;
+}
+
+/*.container {*/
+/*  max-width: 1140px;*/
+/*}*/
+
+/* Navbar */
+.navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e9f2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 20px;
+  color: #2c3e50 !important;
+}
+
+.navbar-nav > li > a {
+  color: #555 !important;
+  font-weight: 500;
+}
+
+.navbar-nav > li > a:hover {
+  color: #000 !important;
+}
+
+/* Panel as Card */
+.panel {
+  border-radius: 8px;
+  border: 1px solid #e5e9f2;
+  box-shadow: none;
+  margin-bottom: 30px;
+}
+
+.panel-heading {
+  background-color: #f0f2f7;
+  border-color: #e5e9f2;
+  color: #333;
+  font-weight: 600;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  padding: 12px 20px;
+}
+
+.panel-body {
+  padding: 20px;
+  background: #fff;
+  border-radius: 6px;
+}
+
+/* Table Styling */
+.table > thead > tr {
+  background-color: #f8f9fc;
+  color: #444;
+  font-weight: 600;
+}
+
+.table-bordered {
+  border-color: #e5e9f2;
+}
+
+.table > tbody > tr:hover {
+  background-color: #f4f7fa;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background-color: #3f8efc;
+  border-color: #3f8efc;
+}
+
+.btn-primary:hover {
+  background-color: #256ef1;
+  border-color: #256ef1;
+}
+
+/* Responsive Table Wrapper */
+@media (max-width: 768px) {
+  .panel {
+    margin-bottom: 20px;
+  }
+  .table-responsive {
+    margin-top: 10px;
+    border: none;
+  }
+}
+.column-item {
+  padding: 10px 0;
+}
+
+.modal {
+  overflow: unset;
+}

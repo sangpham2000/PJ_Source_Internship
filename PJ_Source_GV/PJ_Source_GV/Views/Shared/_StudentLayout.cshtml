@@ -1,0 +1,242 @@
+﻿@using Microsoft.AspNetCore.Builder
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
+@using Microsoft.AspNetCore.Mvc.Localization
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.AspNetCore.Http
+@inject IOptions<RequestLocalizationOptions> LocOptions
+@inject IViewLocalizer Localizer
+@{
+    string version = string.Format("{0:MMddHHmmss}", DateTime.Now);
+}
+
+@inject IHostingEnvironment hostingEnv
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html id="html">
+<head runat="server">
+    <title>@ViewData["Title"]</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="Thu, 19 Nov 1900 08:52:00 GMT" />
+    <link rel="shortcut icon" href="~/images/icons/logo.ico" />
+    <!--Loading bootstrap css-->
+    <link type="text/css" rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,700" />
+    <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400,700,300" />
+    <link type="text/css" rel="stylesheet"
+          href="~/vendors/jquery-ui-1.10.4.custom/css/ui-lightness/jquery-ui-1.10.4.custom.min.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/font-awesome/css/font-awesome.min.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/bootstrap/css/bootstrap.min.css" />
+    <!--LOADING STYLESHEET FOR PAGE-->
+    <link type="text/css" rel="stylesheet" href="~/vendors/iCheck/skins/all.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/bootstrap-select/bootstrap-select.min.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/bootstrap-switch/css/bootstrap-switch.css" />
+    <!--Loading style vendors-->
+    <link type="text/css" rel="stylesheet" href="~/vendors/animate.css/animate.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/jquery-pace/pace.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/iCheck/skins/all.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/jquery-notific8/jquery.notific8.min.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/bootstrap-daterangepicker/daterangepicker-bs3.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/DataTables/media/css/jquery.dataTables.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/DataTables/extensions/FixedColumns/css/fixedColumns.dataTables.min.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/DataTables/media/css/dataTables.bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/summernote/summernote.css" />
+    <link type="text/css" rel="stylesheet" href="~/vendors/bootstrap-datepicker/css/datepicker.css" />
+    <!--Loading style-->
+    <link type="text/css" rel="stylesheet" href="~/css/orange-blue.css" class="default-style" />
+    <link type="text/css" rel="stylesheet" href="~/css/style-responsive.css" />
+    <link type="text/css" rel="stylesheet" href="~/css/custom.css" />
+
+    <script src="~/js/jquery-1.10.2.min.js"></script>
+    <script src="~/js/jquery-migrate-1.2.1.min.js"></script>
+    <script src="~/js/jquery-ui.js"></script>
+    <script src="~/vendors/jquery-validate/jquery.validate.min.js"></script>
+    <!--loading bootstrap js-->
+    <script src="~/vendors/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/vendors/bootstrap-hover-dropdown/bootstrap-hover-dropdown.js"></script>
+    <script src="~/js/html5shiv.js"></script>
+    <script src="~/js/respond.min.js"></script>
+    <script src="~/vendors/metisMenu/jquery.metisMenu.js"></script>
+    <script src="~/vendors/slimScroll/jquery.slimscroll.js"></script>
+    <script src="~/vendors/jquery-cookie/jquery.cookie.js"></script>
+    <script src="~/vendors/iCheck/icheck.min.js"></script>
+    <script src="~/vendors/iCheck/custom.min.js"></script>
+    <script src="~/vendors/jquery-notific8/jquery.notific8.min.js"></script>
+    <script src="~/vendors/jquery-highcharts/highcharts.js"></script>
+    <script src="~/js/jquery.menu.js"></script>
+    <script src="~/vendors/jquery-pace/pace.min.js"></script>
+    <script src="~/vendors/holder/holder.js"></script>
+    <script src="~/vendors/responsive-tabs/responsive-tabs.js"></script>
+    <script src="~/vendors/jquery-news-ticker/jquery.newsTicker.min.js"></script>
+    <script src="~/vendors/moment/moment.js"></script>
+    <script src="~/vendors/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+    <script src="~/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
+    <script src="~/vendors/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js"></script>
+    <link type="text/css" rel="stylesheet" href="~/vendors/jquery-toastr/toastr.min.css" />
+    <!--core javascript-->
+    <script src="~/js/main.js"></script>
+    <!--LOADING SCRIPTS FOR PAGE-->
+    <script src="~/vendors/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+    <script src="~/vendors/iCheck/icheck.min.js"></script>
+    <script src="~/vendors/iCheck/custom.min.js"></script>
+    <script src="~/js/ui-checkbox-radio.js"></script>
+    <script src="~/js/jquery.mask.min.js"></script>
+    <script src="~/vendors/bootstrap-select/bootstrap-select.min.js"></script>
+    <script src="~/vendors/DataTables/media/js/jquery.dataTables.js"></script>
+    <script src="~/vendors/DataTables/media/js/dataTables.bootstrap.js"></script>
+    <script src="~/vendors/DataTables/extensions/FixedColumns/js/dataTables.fixedColumns.js"></script>
+    <script src="~/vendors/jquery-toastr/toastr.min.js"></script>
+    <script src="~/js/ui-toastr-notifications.js"></script>
+    <script src="~/js/bootbox.min.js"></script>
+    <script src="~/js/download.js"></script>
+    <script src="~/vendors/summernote/summernote.js"></script>
+    <script src="~/js/ui-tabs.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body style="padding: 0">
+    <div>
+        <!--BEGIN BACK TO TOP--><a id="totop" href="#"><i class="fa fa-angle-up"></i></a><!--END BACK TO TOP-->
+        <!--BEGIN TOPBAR-->
+        <div id="header-topbar-option-demo" class="page-header-topbar">
+            <nav id="topbar" role="navigation" style="margin-bottom: 0; z-index: 2;"
+                 class="navbar navbar-default navbar-static-top">
+                <div class="navbar-header">
+                    <button type="button" data-toggle="collapse" data-target=".sidebar-collapse" class="navbar-toggle">
+                        <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+                    </button>
+                    <a id="logo" class="navbar-brand" asp-controller="Home" asp-action="Index">
+                        <span class="fa fa-rocket"></span>
+                        <span class="logo-text">@Localizer["SourceMau"]</span><span style="display: none" class="logo-text-icon">SM</span>
+                    </a>
+                </div>
+                <div class="topbar-main" style="background-color:#0067AC !important;">
+                    <a id="menu-toggle" href="#" class="hidden-xs"><i class="fa fa-bars"></i></a>
+                    <ul class="nav navbar navbar-top-links navbar-right mbn">
+                        <li class="dropdown topbar-user">
+                            <a data-hover="dropdown" href="#" class="dropdown-toggle">
+                                <img src="/images/admin.ico" alt=""
+                                     class="img-responsive img-circle" />&nbsp;<span class="hidden-xs">@User.Identity.Name</span>&nbsp;<span class="caret"></span>
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-user pull-right">
+                                <li>
+                                    <a href="/SinhVien/Logout" class="right-logout" data-hover="tooltip" title="@Localizer["Logout"]"><i class="fa fa-sign-out"></i>@Localizer["Logout"]</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            @{
+                                var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+                                var cultureItems = LocOptions.Value.SupportedUICultures
+                                    .Select(c => new SelectListItem { Value = c.Name, Text = c.DisplayName })
+                                    .ToList();
+                                var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value + Context.Request.QueryString}";
+                            }
+                            <!--BEGIN THEME SETTING-->
+                            <a id="theme-setting" data-hover="dropdown" class="dropdown-toggle">
+                                <i class="fa fa-cogs"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-theme-setting pull-right">
+                                <li>
+                                    <h4 class="mtn"><i class="fa fa-language"></i> @Localizer["ChooseLanguage"]</h4>
+                                    <form asp-controller="Home" asp-action="SetLanguage" id="form" method="post" asp-route-returnUrl="@returnUrl" role="form">
+                                                <select id="culture" name="culture" onchange="this.form.submit();" class="form-control selectpicker phongBan"
+                                                        data-style="btn-white" data-show-subtext="true" data-live-search="true"
+                                                        asp-for="@requestCulture.RequestCulture.UICulture.Name" asp-items="cultureItems"></select>
+                                    </form>
+                                </li>
+                            </ul>
+                            <!--END THEME SETTING-->
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            </div>
+            <!--END TOPBAR-->
+            <div id="wrapper">
+                <!--BEGIN SIDEBAR MENU-->
+                <nav id="sidebar" role="navigation" class="navbar-default navbar-static-side">
+                    <div class="sidebar-collapse menu-scroll">
+                        <ul id="side-menu" class="nav">
+                            <li class="user-panel">
+                                <div class="thumb">
+                                    <img src="/images/admin.ico"
+                                         alt="" class="img-circle" />
+                                </div>
+                                <div class="info">
+                                    <ul class="list-inline list-unstyled">
+                                        @if (User.Identity.Name.Length > 10)
+                                        {
+                                            <span title="@User.Identity.Name">@User.Identity.Name.Substring(0, 10) ...</span>
+                                        }
+                                        else
+                                        {
+                                            <span title="@User.Identity.Name">@User.Identity.Name</span>
+                                        }
+
+                                        <li>
+                                            <a href="/sinhvien/logout" data-hover="tooltip" title="@Localizer["Logout"]"><i class="fa fa-sign-out"></i></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="clearfix"></div>
+                            </li>
+
+                            <li>
+                                <a href="https://stdportal.tdtu.edu.vn" target="_blank">
+                                    <i class="fa fa-sign-in"></i>
+                                    <span class="menu-title">@Localizer["Student"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/sinhvien">
+                                    <i class="fa fa-tachometer">
+                                    </i><span class="menu-title">@Localizer["HomeMenu"]</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/createstandard">
+                                    <i class="fa fa-tachometer">
+                                    </i><span class="menu-title">@Localizer["CreateStandard"]</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <!--END SIDEBAR MENU--><!--BEGIN CHAT FORM-->
+                <div id="page-wrapper">
+                    <div id="title-breadcrumb-option-demo" class="page-title-breadcrumb">
+                        <breadcrumb asp-homepage-title="@Localizer["HomeMenu"].Value"
+                                    asp-homepage-url="@Url.Action("Index", "SinhVien", values: new { area = "" })"
+                                    asp-bootstrap-version="V3"
+                                    asp-homepage-glyphicon="fa fa-home" class="breadcrumb page-breadcrumb pull-left"><i class="fa fa-angle-right"></i></breadcrumb>
+                        <div class="page-header pull-right">
+                            <div class="page-title">@ViewData["Title"]</div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="page-content">
+                        @RenderBody()
+                    </div>
+
+
+                </div>
+                <!--BEGIN FOOTER-->
+                <div id="footer" class="fixed">
+                    <div class="pull-left">
+                        Trình duyệt hỗ trợ tốt nhất: <img src="/images/compatible_firefox.png" width="25px" />&nbsp;&nbsp;<img src="/images/compatible_chrome.gif" width="25px" />
+                    </div>
+                    <div class="copyright">2019 © Ứng dụng được phát triển bởi Tổ phát triển phần mềm - Trung tâm Công nghệ Thông tin Ứng dụng</div>
+                </div>
+                <!--END FOOTER--><!--END PAGE WRAPPER-->
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,182 @@
+﻿@using PJ_Source_GV.Areas.API.Models
+@using PJ_Source_GV.Services;
+@using PJ_Source_GV.Caption
+@using System.Security.Claims;
+
+@{
+   
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-blue">
+            <div class="panel-heading">
+                @ViewData["title"]
+                <div class="toolbars">
+                    @ViewData["group_name"]
+                </div>
+            </div>
+            <div class="panel-body pan">
+                <form action="#" class="form-horizontal form-seperated mbl">
+                    <div class="form-body">
+                        <input class="hide" id="group_id" name="id" value='@ViewData["group_id"]' />
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">@SharedLocalizer["Type"] @SharedLocalizer["Email"]: </label>
+                            <div class="col-md-9">
+                                <div class="radio">
+                                    <label for="2" class="radio-inline"><input name="ckemail" id="2" tabindex="1" class="changeThu" checked type="radio" value="&#64;tdtu.edu.vn" /> Lecturer</label>
+                                    <label for="3" class="radio-inline"><input name="ckemail" id="3" tabindex="2" class="changeThu" type="radio" value="&#64;student.tdtu.edu.vn" /> StudentTDTU</label>
+                                    <label for="4" class="radio-inline"><input name="ckemail" id="4" tabindex="3" class="changeThu" type="radio" value="" /> Khác <small>(Nhập đầy đủ thông tin email)</small></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">@SharedLocalizer["Email"]: </label>
+                            <div class="col-md-6">
+                                <input id="selMember" class="form-control" name="selMember" value='' />
+                            </div>
+                            <div class="col-md-3">
+                                <button id="btnSave" type="button" class="btn btn-primary">@SharedLocalizer["Save"]</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <table class="table table-bordered display nowrap" id="danhSach">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Mã nhân viên</th>
+                                        <th>Tên nhân viên</th>
+                                        <th>Mã Khoa</th>
+                                        <th>Tên Khoa</th>
+                                        <th>Emaill</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="Member_Body">
+                                    @{ var stt = 0;}
+                                    @foreach (NhanVienSVModel row in Model)
+                                    {
+                                        stt++;
+                                    <tr>
+                                        <td>
+                                            @stt
+                                        </td>
+                                        <td>
+                                            @row.MaNhanVien
+                                        </td>
+                                        <td>
+                                            @row.Hoten
+                                        </td>
+                                        <td>
+                                            @row.MaKhoa
+                                        </td>
+                                        <td>
+                                            @row.TenBoPhan
+                                        </td>
+                                        <td>
+                                            @row.Email
+                                        </td>
+                                        <td>
+                                            <a class="confirm-delete" id="delete" title="@SharedLocalizer["Delete"]" data-id="@row.Email" data-donvi="@row.MaKhoa"><i class="fa-lg btn-control fa fa-trash-o"></i></a>
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var table = $('#danhSach').DataTable({
+            drawCallback: function () {
+                $('input[type="checkbox"]:not(".switch"):not(".checkall")').iCheck({
+                    checkboxClass: 'icheckbox_minimal-grey',
+                    increaseArea: '20%' // optional
+                });
+                if ($("table").parent('#table-responsive').length == 0) {
+                    $("table").wrap('<div id="table-responsive" style="overflow: auto !important; width: 100%;"></div>');
+                }
+            }
+        });
+    });
+
+    //detele member
+    $(document).on("click", "#delete", function () {
+        //console.log($('#Row-' + $(this).data().email));
+        //$('#Row-' + $(this).data().email).remove();
+        var email = $(this).data("id");
+        var madonvi = $(this).data("donvi");
+
+        $.ajax({
+            url: "/API/Group/DeleteMember",
+            type: "post",
+            dataType: 'json',
+            data: {
+                group_id: $("#group_id").val(),
+                email: email,
+                madonvi: madonvi
+            },
+            success: function (result) {
+                window.location.reload();
+            }
+        });
+    });
+
+    //insert member
+    $(document).on("click", "#btnSave", function () {
+        var email = $('#selMember').val() + $("input[type=radio][name=ckemail]:checked").val();
+        //alert(email);
+        //return;
+
+         $.ajax({
+            url: "/Group/GetAllMemberUnit",
+            type: "post",
+            data: {
+                email: email
+            },
+             success: function (result) {
+                if (result.length == 0) {
+                    $.scojs_message('@SharedLocalizer["Error"]', $.scojs_message.TYPE_ERROR);
+                    return
+                }
+
+                bootbox.prompt({
+                    title: "Chọn đơn vị để phân quyền",
+                    inputType: 'select',
+                    inputOptions: $.map(result, function (val) { return { text: val.TenBoPhan, value: val.MaBoPhan } }),
+                    callback: function (result) {
+                        if (result == null) return
+
+                        $.ajax({
+                            url: "/API/Group/InsertMember",
+                            type: "post",
+                            data: {
+                                group_id: $("#group_id").val(),
+                                email: email,
+                                madonvi: result
+                            },
+                            dataType: 'json',
+                            success: function (result) {
+                                if (result === 'Exists') {
+                                    alert("@SharedLocalizer["ExistedError"]");
+                                    return;
+                                }
+                                window.location.reload();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        
+    });
+</script>
+
