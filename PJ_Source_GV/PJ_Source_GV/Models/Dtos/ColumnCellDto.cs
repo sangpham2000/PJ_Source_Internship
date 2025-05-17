@@ -2,10 +2,10 @@ using System;
 
 namespace PJ_Source_GV.Models.Models.Dtos;
 
-public class TableCellDto
+public class ColumnCellDto
 {
     public int Id { get; set; }
-    public int TableId { get; set; }
+    public int ColumnId { get; set; }
     public string Value { get; set; }
     public int Order { get; set; }
     public DateTime CreatedAt { get; set; }

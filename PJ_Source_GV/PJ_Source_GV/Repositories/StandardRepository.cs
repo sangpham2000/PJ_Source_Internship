@@ -7,6 +7,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using PJ_Source_GV.Models.Entities;
 using PJ_Source_GV.Models.Models.Dtos;
+using Spire.Doc.Fields;
 
 namespace PJ_Source_GV.Repositories;
 
@@ -24,31 +25,35 @@ public class StandardRepository : IStandardRepository
     public async Task<List<StandardDto>> GetAll()
     {
         using var db = Connection;
-        var result = await db.QueryAsync<StandardEntity>("SELECT * FROM Standard");
-        var dtoList = result.Select(e => new StandardDto
+        var result = await db.QueryAsync<StandardEntity>("SELECT * FROM std_standard");
+        var dtoList = new List<StandardDto>();
+        if (result.Any())
         {
-            Id = e.id,
-            Name = e.name,
-            NormalizedName = e.normalized_name,
-            CreatedAt = e.created_at,
-            UpdatedAt = e.updated_at,
-            CreatedBy = e.created_by,
-            UpdatedBy = e.updated_by
-        }).ToList();
+            dtoList = result.Select(e => new StandardDto
+            {
+                Id = e.id,
+                Name = e.name,
+                NormalizedName = e.normalized_name,
+                CreatedAt = e.created_at,
+                UpdatedAt = e.updated_at,
+                CreatedBy = e.created_by,
+                UpdatedBy = e.updated_by
+            }).ToList();
+        }
         return dtoList;
     }
 
     public StandardDto GetById(string id)
     {
         using var db = Connection;
-        return db.QueryFirstOrDefault<StandardDto>("SELECT * FROM Standard WHERE id = @Id", new { Id = id });
+        return db.QueryFirstOrDefault<StandardDto>("SELECT * FROM std_standard WHERE id = @Id", new { Id = id });
     }
 
     public async Task<int> Add(StandardDto StandardDto)
     {
         using var db = Connection;
         var sql = @"
-            INSERT INTO Standard (name, normalized_name, created_at, updated_at, created_by, updated_by)
+            INSERT INTO std_standard (name, normalized_name, created_at, updated_at, created_by, updated_by)
             VALUES (@Name, @NormalizedName, @CreatedAt, @UpdatedAt, @CreatedBy, @UpdatedBy)";
         var result = await db.ExecuteAsync(sql, StandardDto);
         return result;
@@ -58,7 +63,7 @@ public class StandardRepository : IStandardRepository
     {
         using var db = Connection;
         var sql = @"
-            UPDATE Standard
+            UPDATE std_standard
             SET name = @Name,
                 normalized_name = @NormalizedName,
                 updated_at = @UpdatedAt,
@@ -70,6 +75,6 @@ public class StandardRepository : IStandardRepository
     public void Delete(string id)
     {
         using var db = Connection;
-        db.Execute("DELETE FROM Standard WHERE id = @Id", new { Id = id });
+        db.Execute("DELETE FROM std_standard WHERE id = @Id", new { Id = id });
     }
 }

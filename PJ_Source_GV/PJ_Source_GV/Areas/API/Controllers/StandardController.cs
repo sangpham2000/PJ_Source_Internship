@@ -40,4 +40,30 @@ public class StandardController : Controller
         }
         return Created();
     }
+    
+    [Route("API/Standard")]
+    [Area("API")]
+    [HttpPut]
+    public async Task<IActionResult> UpdateStandard([FromBody] StandardDto request)
+    {
+        var result = await _standardRepository.Add(request);
+        if (result == 0)
+        {
+            return BadRequest();
+        }
+        return NoContent();
+    }
+    
+    [Route("API/Standard{id}")]
+    [Area("API")]
+    [HttpDelete]
+    public async Task<IActionResult> DeleteStandard([FromQuery] string id)
+    {
+        // var result = await _standardRepository.Add(request);
+        // if (result == 0)
+        // {
+        //     return BadRequest();
+        // }
+        return NoContent();
+    }
 }   

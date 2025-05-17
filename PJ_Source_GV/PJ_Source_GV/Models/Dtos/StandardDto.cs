@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace PJ_Source_GV.Models.Models.Dtos;
 
@@ -11,5 +12,7 @@ public class StandardDto
     public DateTime UpdatedAt { get; set; }
     public int CreatedBy { get; set; }
     public int UpdatedBy { get; set; }
+    
+    public List<StandardTableDto> Tables { get; set; }
 }
 

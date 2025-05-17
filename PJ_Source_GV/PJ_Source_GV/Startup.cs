@@ -94,6 +94,15 @@ namespace PJ_Source_GV
             ConstValue.ConnectionString = Configuration.GetConnectionString("DefaultConnection");
             ConstValue.PDFViewer = Configuration.GetConnectionString("PDFViewer");
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTI2ODU2QDMxMzkyZTMzMmUzMGVxcVlybE80VGZITkhubXJGRGJrZk96R2JUM2labS9RQUxGaS9IRjlSNzg9");
+            
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                    builder.SetIsOriginAllowed(origin => true)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -110,6 +119,8 @@ namespace PJ_Source_GV
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+            
+            app.UseCors("AllowAll");
 
             app.UseStaticFiles();
 
