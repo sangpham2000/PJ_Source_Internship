@@ -63,8 +63,19 @@ Vue.component("app-container", {
         },
       ],
     });
+    
+    this.fetchStandards();
   },
   methods: {
+    async fetchStandards() {
+      try {
+        const res = await fetch("API/standard");
+        if (!res.ok) throw new Error("Fetch failed");
+        this.standards = await res.json();
+      } catch (err) {
+        console.error("Lỗi khi lấy standards:", err);
+      }
+    },
     backToList() {
       this.currentPage = "standards-list";
     },

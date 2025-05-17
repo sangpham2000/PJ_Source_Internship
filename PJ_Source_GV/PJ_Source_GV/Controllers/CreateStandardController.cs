@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using DNTBreadCrumb.Core;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,9 @@ using Microsoft.Extensions.Localization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Localization;
 using PJ_Source_GV.FunctionSupport;
+using PJ_Source_GV.Models;
 using SSOLibSVCore;
+using PJ_Source_GV.Repositories;
 
 namespace PJ_Source_GV.Controllers
 {
@@ -15,10 +18,12 @@ namespace PJ_Source_GV.Controllers
     public class CreateStandardController : PrivateSVCoreController
     {
         private readonly IStringLocalizer<CreateStandardController> _localizer;
+        private readonly IStandardRepository _standardRepository;
 
-        public CreateStandardController(IStringLocalizer<CreateStandardController> localizer)
+        public CreateStandardController(IStringLocalizer<CreateStandardController> localizer, IStandardRepository standardRepository)
         {
             _localizer = localizer;
+            _standardRepository = standardRepository;
         }
 
         [StudentLoginCheck]

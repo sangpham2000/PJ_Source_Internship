@@ -15,6 +15,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using PJ_Source_GV.Caption;
 using PJ_Source_GV.FunctionSupport;
+using PJ_Source_GV.Repositories;
 using SSOLibCore;
 
 namespace PJ_Source_GV
@@ -42,6 +43,9 @@ namespace PJ_Source_GV
                 .AddDataAnnotationsLocalization();
             services.AddSession();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            
+            
+            services.AddScoped<IStandardRepository, StandardRepository>();
 
             services.Configure<FormOptions>(x =>
             {
