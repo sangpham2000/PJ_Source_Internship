@@ -1,10 +1,15 @@
-Vue.component('standard-editor', {
-  props: ['standard'],
+Vue.component("standard-editor", {
+  props: ["standard"],
+  methods: {
+    saveStandard() {
+      this.$emit("save", this.standard);
+    },
+  },
   template: `
     <div>
       <div class="page-header">
         <div class="pull-right">
-          <button class="btn btn-success" @click="$emit('save', standard)">
+          <button class="btn btn-success" @click="saveStandard">
             <i class="fa fa-save"></i> Lưu thay đổi
           </button>
           <button class="btn btn-default" @click="$emit('back')" style="margin-left:5px;">
@@ -15,7 +20,12 @@ Vue.component('standard-editor', {
       </div>
       <div class="form-group">
         <label for="standard-name">Tên tiêu chuẩn:</label>
-        <input id="standard-name" class="form-control" v-model="standard.name" />
+        <input
+          id="standard-name"
+          class="form-control"
+          v-model="standard.name"
+          placeholder="Nhập tên tiêu chuẩn..."
+        />
       </div>
       <div class="panel panel-default">
         <div class="panel-heading">
@@ -44,5 +54,5 @@ Vue.component('standard-editor', {
         </div>
       </div>
     </div>
-  `
+  `,
 });

@@ -1,11 +1,12 @@
 Vue.component("app-container", {
   template: `
-    <div class="container">
+    <div class="container-fluid">
       <standards-list
         v-if="currentPage === 'standards-list'"
         :standards="standards"
         @create="showCreateStandardModal"
         @edit="editStandard"
+        @remove="removeStandard"
       />
       <standard-editor
         v-if="currentPage === 'edit-standard'"
@@ -48,67 +49,6 @@ Vue.component("app-container", {
     };
   },
   created() {
-    // this.standards.push({
-    //   id: 1,
-    //   name: "Tiêu chuẩn 1",
-    //   normalizedName: "tieu_chuan_1",
-    //   createdAt: "2025-05-01T00:00:00Z",
-    //   updatedAt: "2025-05-01T00:00:00Z",
-    //   createdBy: 1,
-    //   updatedBy: 1,
-    //   tables: [
-    //     {
-    //       id: 1,
-    //       standardId: 1,
-    //       name: "Bảng 1A",
-    //       normalizedName: "bang_1a",
-    //       order: 1,
-    //       createdAt: "2025-05-01T00:00:00Z",
-    //       updatedAt: "2025-05-01T00:00:00Z",
-    //       createdBy: 1,
-    //       updatedBy: 1,
-    //       columns: [
-    //         {
-    //           id: 1,
-    //           tableId: 1,
-    //           name: "Tiêu chí đánh giá",
-    //           normalizedName: "tieu_chi_danh_gia",
-    //           type: 1,
-    //           order: 1,
-    //           createdAt: "2025-05-01T00:00:00Z",
-    //           updatedAt: "2025-05-01T00:00:00Z",
-    //           createdBy: 1,
-    //           updatedBy: 1,
-    //         },
-    //         {
-    //           id: 2,
-    //           tableId: 1,
-    //           name: "Điểm tối đa",
-    //           normalizedName: "diem_toi_da",
-    //           type: 2,
-    //           order: 2,
-    //           createdAt: "2025-05-01T00:00:00Z",
-    //           updatedAt: "2025-05-01T00:00:00Z",
-    //           createdBy: 1,
-    //           updatedBy: 1,
-    //         },
-    //         {
-    //           id: 3,
-    //           tableId: 1,
-    //           name: "Điểm đánh giá",
-    //           normalizedName: "diem_danh_gia",
-    //           type: 3,
-    //           order: 3,
-    //           createdAt: "2025-05-01T00:00:00Z",
-    //           updatedAt: "2025-05-01T00:00:00Z",
-    //           createdBy: 1,
-    //           updatedBy: 1,
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // });
-
     this.fetchStandards();
   },
   methods: {
@@ -119,26 +59,21 @@ Vue.component("app-container", {
           "Content-Type": "application/json",
         },
       };
-
       if (data) {
         options.body = JSON.stringify(data);
       }
-
       const response = await fetch(url, options);
-
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
-
-      return response.json(); // Trả về JSON sau khi parse
+      return response.json();
     },
-
     async fetchStandards() {
       try {
         const items = await this.apiRequest(
-            "API/standard",
-            "GET"
+          "http://localhost:28635/API/standard",
+          "GET"
         );
         this.standards = [...items];
         console.log("Standards fetched:", items);
@@ -183,16 +118,12 @@ Vue.component("app-container", {
       this.showModal = null;
     },
     async saveStandard(updated) {
-      console.log("Saving standard:", updated);
-
       try {
         const savedStandard = await this.apiRequest(
-            "API/standard",
-            updated.id ? "PUT" : "POST",
-            updated
+          "http://localhost:28635/api/standard",
+          updated.id ? "PUT" : "POST",
+          updated
         );
-
-        // Cập nhật danh sách sau khi lưu thành công
         const idx = this.standards.findIndex((s) => s.id === updated.id);
         if (idx >= 0) {
           this.standards.splice(idx, 1, updated);
@@ -205,8 +136,18 @@ Vue.component("app-container", {
         console.error("Error saving standard:", error);
       }
     },
+    async removeStandard(standard) {
+      try {
+        await this.apiRequest(
+          `http://localhost:28635/api/standard/${standard.id}`,
+          "DELETE"
+        );
+        this.fetchStandards();
+      } catch (error) {
+        console.error("Error saving standard:", error);
+      }
+    },
     addTable(table) {
-      console.log("Adding table:", table);
       this.currentStandard.tables.push(table);
       this.showModal = null;
     },
@@ -230,8 +171,8 @@ Vue.component("app-container", {
         });
       } else {
         this.currentStandard.tables[col.tableIndex].columns[
-            col.columnIndex
-            ].name = col.name;
+          col.columnIndex
+        ].name = col.name;
       }
       this.showModal = null;
     },

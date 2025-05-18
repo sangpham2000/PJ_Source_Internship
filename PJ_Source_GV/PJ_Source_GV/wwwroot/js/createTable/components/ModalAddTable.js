@@ -4,9 +4,23 @@ Vue.component("modal-add-table", {
       name: "",
       columns: [],
       columnCount: 3,
+      errors: { name: "", columns: "" },
     };
   },
   methods: {
+    validateForm() {
+      this.errors = { name: "", columns: "" };
+      let isValid = true;
+      if (!this.name) {
+        this.errors.name = "Vui lòng nhập tên bảng.";
+        isValid = false;
+      }
+      if (this.columns.length === 0) {
+        this.errors.columns = "Vui lòng thêm ít nhất một cột.";
+        isValid = false;
+      }
+      return isValid;
+    },
     generateColumns() {
       this.columns = Array.from({ length: this.columnCount }, (_, i) => ({
         name: "Cột " + (i + 1),
@@ -16,11 +30,16 @@ Vue.component("modal-add-table", {
       this.columns.push({ name: "" });
     },
     removeColumn(index) {
-      this.columns.splice(index, 1);
+      if (window.confirm("Bạn có chắc muốn xóa cột này?")) {
+        this.columns.splice(index, 1);
+      }
     },
     addTable() {
-      if (!this.name || this.columns.length === 0) return;
+      if (!this.validateForm()) return;
       this.$emit("add", { name: this.name, columns: this.columns });
+      this.name = "";
+      this.columns = [];
+      this.columnCount = 3;
     },
   },
   template: `
@@ -28,11 +47,11 @@ Vue.component("modal-add-table", {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <button class="close" @click="$emit('cancel')"><span>×</span></button>
+            <button class="close" @click="$emit('cancel')"><span>&times;</span></button>
             <h4 class="modal-title">Thêm bảng mới</h4>
           </div>
           <div class="modal-body">
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': errors.name }">
               <label for="new-table-name">Tên bảng:</label>
               <input
                 class="form-control"
@@ -41,6 +60,7 @@ Vue.component("modal-add-table", {
                 type="text"
                 v-model="name"
               />
+              <span class="help-block" v-if="errors.name">{{ errors.name }}</span>
             </div>
 
             <div class="form-group">
@@ -69,8 +89,7 @@ Vue.component("modal-add-table", {
               </div>
             </div>
 
-
-            <div v-if="columns.length &gt; 0">
+            <div v-if="columns.length > 0">
               <hr />
               <h5>Danh sách cột:</h5>
               <div
@@ -101,6 +120,7 @@ Vue.component("modal-add-table", {
                 <i class="fa fa-plus"></i> Thêm cột
               </button>
             </div>
+            <div class="alert alert-danger" v-if="errors.columns">{{ errors.columns }}</div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-default" @click="$emit('cancel')">Hủy</button>

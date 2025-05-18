@@ -15,6 +15,7 @@ Vue.component("standards-list", {
           v-for="standard in standards"
           :key="standard.id"
           :standard="standard"
+          @remove="$emit('remove', standard)"
           @edit="$emit('edit', standard)"
         />
       </div>
