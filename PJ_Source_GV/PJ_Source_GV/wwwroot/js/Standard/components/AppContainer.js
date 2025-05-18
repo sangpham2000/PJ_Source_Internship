@@ -67,7 +67,11 @@ Vue.component("app-container", {
         const errorText = await response.text();
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
-      return response.json();
+      if (response.status === 204 || response.status === 201) {
+        return null; // No content
+      } else {
+        return response.json();
+      }
     },
     async fetchStandards() {
       try {
@@ -107,11 +111,8 @@ Vue.component("app-container", {
       this.currentPage = "edit-standard";
     },
     createStandard(newStd) {
-      const id = "TC" + (this.standards.length + 1).toString().padStart(2, "0");
       this.currentStandard = {
-        id,
         name: newStd.name,
-        createdDate: new Date().toLocaleDateString("vi-VN"),
         tables: [],
       };
       this.currentPage = "edit-standard";
@@ -129,7 +130,7 @@ Vue.component("app-container", {
           this.standards.splice(idx, 1, updated);
         } else {
           this.standards.push(updated);
-        }
+        } 
         this.currentPage = "standards-list";
         this.fetchStandards();
       } catch (error) {

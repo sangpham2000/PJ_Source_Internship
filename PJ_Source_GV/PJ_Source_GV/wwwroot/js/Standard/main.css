@@ -154,6 +154,10 @@ body {
   border-bottom: none;
 }
 
+.modal {
+  overflow: unset;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .panel {

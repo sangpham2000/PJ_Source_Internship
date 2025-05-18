@@ -15,12 +15,12 @@ using PJ_Source_GV.Repositories;
 namespace PJ_Source_GV.Controllers
 {
     [BreadCrumb(UseDefaultRouteUrl = true, Order = 0)]
-    public class CreateStandardController : PrivateSVCoreController
+    public class StandardController : PrivateSVCoreController
     {
-        private readonly IStringLocalizer<CreateStandardController> _localizer;
+        private readonly IStringLocalizer<StandardController> _localizer;
         private readonly IStandardRepository _standardRepository;
 
-        public CreateStandardController(IStringLocalizer<CreateStandardController> localizer, IStandardRepository standardRepository)
+        public StandardController(IStringLocalizer<StandardController> localizer, IStandardRepository standardRepository)
         {
             _localizer = localizer;
             _standardRepository = standardRepository;
@@ -30,7 +30,7 @@ namespace PJ_Source_GV.Controllers
         public async Task<IActionResult> Index()
         {
             //Info Page
-            this.InitBreadCrumbTitle(_localizer["CreateStandard"], _localizer["CreateStandard"]);
+            this.InitBreadCrumbTitle(_localizer["Standard"], _localizer["Standard"]);
             var cultureInfo = HttpContext.Features.Get<IRequestCultureFeature>().RequestCulture.UICulture;
             string mssv = ((ClaimsIdentity)User.Identity).FindFirst("MSSV").Value;
 
