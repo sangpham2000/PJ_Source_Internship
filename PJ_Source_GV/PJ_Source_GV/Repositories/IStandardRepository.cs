@@ -7,8 +7,8 @@ namespace PJ_Source_GV.Repositories;
 public interface IStandardRepository
 {
     Task<List<StandardDto>> GetAll();
-    StandardDto GetById(string id);
+    Task<StandardDto?> GetById(int id);
     Task<int> Add(StandardDto standard);
-    void Update(StandardDto standard);
-    void Delete(string id);
+    Task<int> Update(StandardDto standard);
+    Task<bool>  Delete(int id);
 }

@@ -46,12 +46,12 @@ public class StandardController : Controller
     [HttpPut]
     public async Task<IActionResult> UpdateStandard([FromBody] StandardDto request)
     {
-        var result = await _standardRepository.Add(request);
+        var result = await _standardRepository.Update(request);
         if (result == 0)
         {
             return BadRequest();
         }
-        return NoContent();
+        return Ok(request);
     }
     
     [Route("API/Standard{id}")]

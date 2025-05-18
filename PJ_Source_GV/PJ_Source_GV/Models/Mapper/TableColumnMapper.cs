@@ -3,7 +3,7 @@ using PJ_Source_GV.Models.Models.Dtos;
 
 namespace PJ_Source_GV.Models.Mapper;
 
-public class TableConlumnMapper
+public class TableColumnMapper
 {
     public static TableColumnDto ToDto(TableColumnEntity entity)
     {
@@ -12,7 +12,6 @@ public class TableConlumnMapper
             Id = entity.id,
             TableId = entity.table_id,
             Name = entity.name,
-            NormalizedName = entity.normalized_name,
             Order = entity.order,
             CreatedAt = entity.created_at,
             UpdatedAt = entity.updated_at,
@@ -28,7 +27,6 @@ public class TableConlumnMapper
             id = dto.Id,
             table_id = dto.TableId,
             name = dto.Name,
-            normalized_name = dto.NormalizedName,
             order = dto.Order,
             created_at = dto.CreatedAt,
             updated_at = dto.UpdatedAt,
