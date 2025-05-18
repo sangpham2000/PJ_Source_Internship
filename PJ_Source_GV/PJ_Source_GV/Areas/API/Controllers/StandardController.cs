@@ -57,13 +57,9 @@ public class StandardController : Controller
     [Route("API/Standard{id}")]
     [Area("API")]
     [HttpDelete]
-    public async Task<IActionResult> DeleteStandard([FromQuery] string id)
+    public async Task<IActionResult> DeleteStandard([FromQuery] int id)
     {
-        // var result = await _standardRepository.Add(request);
-        // if (result == 0)
-        // {
-        //     return BadRequest();
-        // }
+        var result = await _standardRepository.Delete(id);
         return NoContent();
     }
 }   
