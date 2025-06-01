@@ -1,37 +1,36 @@
+// PJ_Source_GV.Models.Mapper/EvaluationSessionMapper.cs
 using PJ_Source_GV.Models.Entities;
 using PJ_Source_GV.Models.Models.Dtos;
 
 namespace PJ_Source_GV.Models.Mapper;
 
-public class ColumnCellMapper
+public class EvaluationSessionMapper
 {
-    public static ColumnCellDto ToDto(ColumnCellEntity entity)
+    public static EvaluationSessionDto ToDto(EvaluationSessionEntity entity)
     {
-        return new ColumnCellDto
+        return new EvaluationSessionDto
         {
             Id = entity.id,
-            ColumnId = entity.column_id,
-            EvaluationSessionId = entity.evaluation_session_id,
-            Value = entity.value,
+            EvaluationId = entity.evaluation_id,
+            Desc = entity.desc,
             CreatedAt = entity.created_at,
             UpdatedAt = entity.updated_at,
             CreatedBy = entity.created_by,
             UpdatedBy = entity.updated_by
         };
-    } 
-    
-    public static ColumnCellEntity ToEntity(ColumnCellDto dto)
+    }
+
+    public static EvaluationSessionEntity ToEntity(EvaluationSessionDto dto)
     {
-        return new ColumnCellEntity
+        return new EvaluationSessionEntity
         {
             id = dto.Id,
-            column_id = dto.ColumnId,
-            evaluation_session_id = dto.EvaluationSessionId,
-            value = dto.Value,
+            evaluation_id = dto.EvaluationId,
+            desc = dto.Desc,
             created_at = dto.CreatedAt,
             updated_at = dto.UpdatedAt,
             created_by = dto.CreatedBy,
             updated_by = dto.UpdatedBy
         };
-    } 
+    }
 }

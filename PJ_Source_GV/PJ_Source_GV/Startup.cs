@@ -46,6 +46,7 @@ namespace PJ_Source_GV
             
             
             services.AddScoped<IStandardRepository, StandardRepository>();
+            services.AddScoped<IEvaluationRepository, EvaluationRepository>();
 
             services.Configure<FormOptions>(x =>
             {
