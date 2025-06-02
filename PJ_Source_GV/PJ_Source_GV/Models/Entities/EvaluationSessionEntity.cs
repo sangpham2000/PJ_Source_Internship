@@ -1,4 +1,5 @@
 using System;
+using PJ_Source_GV.Models.Vocabulary;
 
 namespace PJ_Source_GV.Models.Entities;
 
@@ -11,4 +12,5 @@ public class EvaluationSessionEntity
     public DateTime? updated_at { get; set; }
     public int? created_by { get; set; }
     public int? updated_by { get; set; }
+    public SessionStatus? status { get; set; }
 }

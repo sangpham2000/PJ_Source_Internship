@@ -158,6 +158,86 @@ public class StandardRepository : IStandardRepository
         return standardDto;
     }
 
+    public async Task<List<StandardDto>> GetByIds(List<int> ids)
+    {
+        if (ids == null || !ids.Any())
+        {
+            return new List<StandardDto>();
+        }
+
+        using var db = Connection;
+        var standardsDict = new Dictionary<int, StandardDto>();
+
+        var sql = @"
+            SELECT 
+                s.id, s.name, s.normalized_name, s.created_at, s.updated_at, s.created_by, s.updated_by,
+                t.id, t.standard_id, t.name, t.order, 
+                t.created_at, t.updated_at, 
+                t.created_by, t.updated_by,
+                c.id, c.table_id, c.name, c.order, 
+                c.type, c.created_at, 
+                c.updated_at, c.created_by, 
+                c.updated_by
+            FROM std_standard s
+            LEFT JOIN std_standard_table t ON s.id = t.standard_id
+            LEFT JOIN std_table_column c ON t.id = c.table_id
+            WHERE s.id IN @Ids
+            ORDER BY s.id, t.id, c.order";
+
+        await db.QueryAsync<StandardEntity, StandardTableEntity, TableColumnEntity, StandardEntity>(
+            sql,
+            (standard, table, column) =>
+            {
+                if (standard?.id == null)
+                    return standard;
+
+                // Get or create StandardDto
+                if (!standardsDict.TryGetValue(standard.id.Value, out var standardDto))
+                {
+                    standardDto = StandardMapper.ToDto(standard);
+                    standardDto.Tables = new List<StandardTableDto>();
+                    standardsDict.Add(standard.id.Value, standardDto);
+                }
+
+                // Process table if it exists
+                if (table?.id != null)
+                {
+                    // Look for existing table in the current standard
+                    var existingTable = standardDto.Tables
+                        .FirstOrDefault(t => t?.Id == table.id);
+
+                    // If table doesn't exist yet, add it to the standard
+                    if (existingTable == null)
+                    {
+                        var tableDto = StandardTableMapper.ToDto(table);
+                        tableDto.Columns = new List<TableColumnDto>();
+                        standardDto.Tables.Add(tableDto);
+                        existingTable = tableDto;
+                    }
+
+                    // Process column if it exists
+                    if (column?.id != null)
+                    {
+                        // Check if column already exists in the table
+                        bool columnExists = existingTable.Columns
+                            .Any(c => c?.Id == column.id);
+
+                        // Only add the column if it doesn't already exist
+                        if (!columnExists)
+                        {
+                            var columnDto = TableColumnMapper.ToDto(column);
+                            existingTable.Columns.Add(columnDto);
+                        }
+                    }
+                }
+
+                return standard;
+            },
+            new { Ids = ids },
+            splitOn: "id,id");
+
+        return standardsDict.Values.ToList();
+    }
     public async Task<int> Add(StandardDto standardDto)
     {
         using var db = Connection;

@@ -16,7 +16,8 @@ public class EvaluationSessionMapper
             CreatedAt = entity.created_at,
             UpdatedAt = entity.updated_at,
             CreatedBy = entity.created_by,
-            UpdatedBy = entity.updated_by
+            UpdatedBy = entity.updated_by,
+            Status = entity.status
         };
     }
 
@@ -30,7 +31,8 @@ public class EvaluationSessionMapper
             created_at = dto.CreatedAt,
             updated_at = dto.UpdatedAt,
             created_by = dto.CreatedBy,
-            updated_by = dto.UpdatedBy
+            updated_by = dto.UpdatedBy,
+            status = dto.Status
         };
     }
 }

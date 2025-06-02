@@ -162,20 +162,31 @@ namespace PJ_Source_GV.Repositories
             using var db = Connection;
             var sessionsDict = new Dictionary<int, EvaluationSessionDto>();
 
+            // Validate evaluation exists
+            var evaluationExists = await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM std_evaluation WHERE id = @EvaluationId",
+                new { EvaluationId = evaluationId });
+
+            if (evaluationExists == 0)
+            {
+                return new List<EvaluationSessionDto>(); // Return empty list if evaluation doesn't exist
+            }
+
             var sql = @"
                 SELECT 
-                    es.id AS session_id, es.evaluation_id, es.[desc] AS description, es.created_at, es.updated_at, es.created_by, es.updated_by,
-                    ess.standard_id,
-                    cc.id AS cell_id, cc.column_id, cc.evaluation_id, cc.value, cc.[order], cc.created_at, cc.updated_at, cc.created_by, cc.updated_by
+                    es.id, es.evaluation_id, es.[desc], es.created_at, es.updated_at, es.created_by, es.updated_by, es.status,
+                    ess.standard_id, s.id, s.name,
+                    cc.id AS cell_id, cc.column_id, cc.evaluation_session_id, cc.value, cc.[order], cc.created_at, cc.updated_at, cc.created_by, cc.updated_by
                 FROM std_evaluation_session es
                 LEFT JOIN std_evaluation_session_standard ess ON es.id = ess.evaluation_session_id
-                LEFT JOIN std_column_cell cc ON es.evaluation_id = cc.evaluation_id
+                LEFT JOIN std_standard s ON ess.standard_id = s.id
+                LEFT JOIN std_column_cell cc ON es.id = cc.evaluation_session_id
                 WHERE es.evaluation_id = @EvaluationId
-                ORDER BY es.id, cc.[order]";
+                ORDER BY es.id DESC, cc.[order] ASC";
 
-            await db.QueryAsync<EvaluationSessionEntity, int?, ColumnCellEntity, EvaluationSessionEntity>(
+            await db.QueryAsync<EvaluationSessionEntity, StandardEntity, ColumnCellEntity, EvaluationSessionEntity>(
                 sql,
-                (session, standardId, cell) =>
+                (session, standardInfo, cell) =>
                 {
                     if (session?.id == null)
                         return session;
@@ -185,14 +196,19 @@ namespace PJ_Source_GV.Repositories
                     {
                         sessionDto = EvaluationSessionMapper.ToDto(session);
                         sessionDto.StandardIds = new List<int>();
+                        sessionDto.StandardNames = new List<string>(); // Initialize StandardNames
                         sessionDto.Cells = new List<ColumnCellDto>();
                         sessionsDict.Add(session.id.Value, sessionDto);
                     }
 
-                    // Add standardId if applicable
-                    if (standardId.HasValue && !sessionDto.StandardIds.Contains(standardId.Value))
+                    // Add standardId and standardName if applicable
+                    if (standardInfo?.id.HasValue == true && !sessionDto.StandardIds.Contains(standardInfo.id.Value))
                     {
-                        sessionDto.StandardIds.Add(standardId.Value);
+                        sessionDto.StandardIds.Add(standardInfo.id.Value);
+                        if (!string.IsNullOrEmpty(standardInfo.name))
+                        {
+                            sessionDto.StandardNames.Add(standardInfo.name);
+                        }
                     }
 
                     // Add cell if applicable
@@ -273,9 +289,9 @@ namespace PJ_Source_GV.Repositories
 
                 // Insert evaluation session
                 var sessionSql = @"
-                    INSERT INTO std_evaluation_session (evaluation_id, [desc], created_at, updated_at, created_by, updated_by)
+                    INSERT INTO std_evaluation_session (evaluation_id, [desc], created_at, updated_at, created_by, updated_by, status)
                     OUTPUT INSERTED.id
-                    VALUES (@EvaluationId, @Desc, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @CreatedBy, @UpdatedBy)";
+                    VALUES (@EvaluationId, @Desc, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @CreatedBy, @UpdatedBy, 0)";
 
                 var sessionId = await db.QuerySingleAsync<int>(sessionSql, new
                 {
