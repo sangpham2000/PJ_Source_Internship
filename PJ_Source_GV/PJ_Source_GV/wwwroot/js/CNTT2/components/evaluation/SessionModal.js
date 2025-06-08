@@ -1,10 +1,10 @@
 Vue.component("session-modal", {
   template: `
-    <div class="modal in session-modal-overlay" id="newSessionModal" style="display:block;">
+    <div class="modal in" id="newSessionModal" style="display:block;">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content session-modal-content">
+            <div class="modal-content">
                 <!-- Header với gradient và icon -->
-                <div class="modal-header session-modal-header">
+                <div class="modal-header">
                     <button
                         type="button"
                         class="close session-close-btn"

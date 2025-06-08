@@ -545,6 +545,7 @@ Vue.component("evaluation-form", {
     },
     async editSession(item) {
       this.currenSession = item;
+      console.log(item)
       switch (item.status) {
         case 1:
           // Draft: Load existing session data (not implemented in original)
@@ -559,7 +560,7 @@ Vue.component("evaluation-form", {
       try {
         const standards = await this.apiRequest(
           `http://localhost:28635/api/standard/GetByIds${
-            item.id ? `/${item.id}` : ""
+            item.id && item.status !== 0 ? `/${item.id}` : ""
           }`,
           "POST",
           item.standardIds
