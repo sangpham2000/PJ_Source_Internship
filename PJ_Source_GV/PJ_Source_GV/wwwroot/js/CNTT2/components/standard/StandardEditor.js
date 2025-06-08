@@ -8,6 +8,7 @@ Vue.component("standard-editor", {
   template: `
     <div>
       <div class="page-header">
+        <h3><i class="fa fa-pencil"></i> Chỉnh sửa tiêu chuẩn: {{ standard.name }}</h3>
         <div class="pull-right">
           <button class="btn btn-success" @click="saveStandard">
             <i class="fa fa-save"></i> Lưu thay đổi
@@ -16,7 +17,7 @@ Vue.component("standard-editor", {
             <i class="fa fa-arrow-left"></i> Quay lại
           </button>
         </div>
-        <h3><i class="fa fa-pencil"></i> Chỉnh sửa tiêu chuẩn: {{ standard.name }}</h3>
+
       </div>
       <div class="form-group">
         <label for="standard-name">Tên tiêu chuẩn:</label>

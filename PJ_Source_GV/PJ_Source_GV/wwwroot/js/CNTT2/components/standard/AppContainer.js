@@ -37,6 +37,7 @@ Vue.component("app-container", {
         @cancel="hideModal"
         @save="saveColumn"
       />
+      <loading-spinner type="ripple" color="orange" message="Vui lòng chờ..." v-if="showLoading"></loading-spinner>
     </div>
   `,
   data() {
@@ -46,6 +47,7 @@ Vue.component("app-container", {
       standards: [],
       currentStandard: { id: "", name: "", tables: [] },
       editingColumn: { tableIndex: -1, columnIndex: -1, name: "", isNew: true },
+      showLoading: false,
     };
   },
   created() {
@@ -74,14 +76,17 @@ Vue.component("app-container", {
       }
     },
     async fetchStandards() {
+      this.showLoading = true;
       try {
         const items = await this.apiRequest(
           "http://localhost:28635/API/standard",
           "GET"
         );
         this.standards = [...items];
+        this.showLoading = false;
         console.log("Standards fetched:", items);
       } catch (err) {
+        this.showLoading = false;
         console.error("Lỗi khi lấy standards:", err);
       }
     },
@@ -130,7 +135,7 @@ Vue.component("app-container", {
           this.standards.splice(idx, 1, updated);
         } else {
           this.standards.push(updated);
-        } 
+        }
         this.currentPage = "standards-list";
         this.fetchStandards();
       } catch (error) {
@@ -183,5 +188,6 @@ Vue.component("app-container", {
     removeTable(index) {
       this.currentStandard.tables.splice(index, 1);
     },
+    confirmDeleteRow() {},
   },
 });

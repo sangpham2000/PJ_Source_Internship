@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -57,5 +58,30 @@ public class StandardController : Controller
     {
         var result = await _standardRepository.Delete(id);
         return NoContent();
+    }
+    
+    [HttpPost("GetByIds")]
+    [HttpPost("GetByIds/{evaluationSessionId}")]
+    public async Task<IActionResult> GetByIds([FromBody] List<int> ids, [FromRoute] int? evaluationSessionId = null)
+    {
+        if (ids == null || !ids.Any())
+        {
+            return BadRequest(new { Message = "List of IDs cannot be null or empty." });
+        }
+
+        List<StandardDto> items; // Initialize the list to hold the data
+        if (evaluationSessionId != null)
+        {
+            items = await _standardRepository.GetHistoryByEvaluationSessionId(ids, (int)evaluationSessionId);
+        }
+        else
+        {
+            items = await _standardRepository.GetByIds(ids);
+        }
+        if (items.Count == 0)
+        {
+            return NoContent();
+        }
+        return Ok(items);
     }
 }   

@@ -59,6 +59,12 @@
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\js\components\app.js" />
     <_ContentIncludedByDefault Remove="wwwroot\js\components\CreateNewStandard.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\CNTT2\components\common\LoadingSpinner.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\CNTT2\components\common\ModalConfirmDelete.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\js\CNTT2\components\" />
   </ItemGroup>
 
 </Project>

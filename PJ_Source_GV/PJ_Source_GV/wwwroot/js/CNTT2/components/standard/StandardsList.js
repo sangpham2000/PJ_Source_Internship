@@ -3,12 +3,10 @@ Vue.component("standards-list", {
   template: `
     <div>
       <div class="page-header">
-        <div class="pull-right">
-          <button class="btn btn-primary" @click="$emit('create')">
-            <i class="fa fa-plus"></i> Tạo tiêu chuẩn mới
-          </button>
-        </div>
         <h3><i class="fa fa-list-alt"></i> Danh sách tiêu chuẩn đánh giá</h3>
+        <button class="btn btn-primary" @click="$emit('create')">
+          <i class="fa fa-plus"></i> Tạo tiêu chuẩn mới
+        </button>
       </div>
       <div class="row">
         <standard-card

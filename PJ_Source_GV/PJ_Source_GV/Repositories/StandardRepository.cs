@@ -106,7 +106,7 @@ public class StandardRepository : IStandardRepository
         var sql = @"
             SELECT 
                 s.id, s.name, s.normalized_name, s.created_at, s.updated_at, s.created_by, s.updated_by,
-                t.id, t.standard_id, t.name, t.order, 
+                t.id, t.standard_id, t.name, 
                 t.created_at, t.updated_at, 
                 t.created_by, t.updated_by,
                 c.id, c.table_id, c.name, c.order, 
@@ -171,10 +171,10 @@ public class StandardRepository : IStandardRepository
         var sql = @"
             SELECT 
                 s.id, s.name, s.normalized_name, s.created_at, s.updated_at, s.created_by, s.updated_by,
-                t.id, t.standard_id, t.name, t.order, 
+                t.id, t.standard_id, t.name,
                 t.created_at, t.updated_at, 
                 t.created_by, t.updated_by,
-                c.id, c.table_id, c.name, c.order, 
+                c.id, c.table_id, c.name, c.[order], 
                 c.type, c.created_at, 
                 c.updated_at, c.created_by, 
                 c.updated_by
@@ -182,7 +182,7 @@ public class StandardRepository : IStandardRepository
             LEFT JOIN std_standard_table t ON s.id = t.standard_id
             LEFT JOIN std_table_column c ON t.id = c.table_id
             WHERE s.id IN @Ids
-            ORDER BY s.id, t.id, c.order";
+            ORDER BY s.id, t.id, c.[order]";
 
         await db.QueryAsync<StandardEntity, StandardTableEntity, TableColumnEntity, StandardEntity>(
             sql,
@@ -234,6 +234,85 @@ public class StandardRepository : IStandardRepository
                 return standard;
             },
             new { Ids = ids },
+            splitOn: "id,id");
+
+        return standardsDict.Values.ToList();
+    }
+    
+    public async Task<List<StandardDto>> GetHistoryByEvaluationSessionId(List<int> ids,int evaluationSessionId)
+    {
+        if (ids == null || !ids.Any())
+        {
+            return new List<StandardDto>();
+        }
+        
+        using var db = Connection;
+        var standardsDict = new Dictionary<int, StandardDto>();
+
+        var sql = @"
+            SELECT 
+                s.id, s.name, s.normalized_name, s.created_at, s.updated_at, s.created_by, s.updated_by,
+                th.table_id AS id, th.standard_id, th.name, th.evaluation_session_id,
+                th.created_at, th.updated_at, th.created_by, th.updated_by,
+                ch.column_id AS id, ch.table_id, ch.name, ch.[order], ch.type,
+                ch.created_at, ch.updated_at, ch.created_by, ch.updated_by
+            FROM std_standard s
+            INNER JOIN std_evaluation_session_standard ess ON s.id = ess.standard_id
+            LEFT JOIN std_standard_table_history th ON s.id = th.standard_id AND th.evaluation_session_id = ess.evaluation_session_id
+            LEFT JOIN std_table_column_history ch ON th.table_id = ch.table_id AND ch.evaluation_session_id = th.evaluation_session_id
+            WHERE ess.evaluation_session_id = @EvaluationSessionId AND s.id IN @Ids
+            ORDER BY s.id, th.id, ch.[order]";
+
+        await db.QueryAsync<StandardEntity, StandardTableEntity, TableColumnEntity, StandardEntity>(
+            sql,
+            (standard, tableHistory, columnHistory) =>
+            {
+                if (standard?.id == null)
+                    return standard;
+
+                // Get or create StandardDto
+                if (!standardsDict.TryGetValue(standard.id.Value, out var standardDto))
+                {
+                    standardDto = StandardMapper.ToDto(standard);
+                    standardDto.Tables = new List<StandardTableDto>();
+                    standardsDict.Add(standard.id.Value, standardDto);
+                }
+
+                // Process table history if it exists
+                if (tableHistory?.id != null)
+                {
+                    // Look for existing table in the current standard
+                    var existingTable = standardDto.Tables
+                        .FirstOrDefault(t => t?.Id == tableHistory.id);
+
+                    // If table doesn't exist yet, add it to the standard
+                    if (existingTable == null)
+                    {
+                        var tableDto = StandardTableMapper.ToDto(tableHistory);
+                        tableDto.Columns = new List<TableColumnDto>();
+                        standardDto.Tables.Add(tableDto);
+                        existingTable = tableDto;
+                    }
+
+                    // Process column history if it exists
+                    if (columnHistory?.id != null)
+                    {
+                        // Check if column already exists in the table
+                        bool columnExists = existingTable.Columns
+                            .Any(c => c?.Id == columnHistory.id);
+
+                        // Only add the column if it doesn't already exist
+                        if (!columnExists)
+                        {
+                            var columnDto = TableColumnMapper.ToDto(columnHistory);
+                            existingTable.Columns.Add(columnDto);
+                        }
+                    }
+                }
+
+                return standard;
+            },
+            new { EvaluationSessionId = evaluationSessionId, Ids = ids  },
             splitOn: "id,id");
 
         return standardsDict.Values.ToList();

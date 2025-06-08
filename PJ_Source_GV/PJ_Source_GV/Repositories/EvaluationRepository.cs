@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using PJ_Source_GV.Models.Entities;
 using PJ_Source_GV.Models.Mapper;
 using PJ_Source_GV.Models.Models.Dtos;
+using PJ_Source_GV.Models.Vocabulary;
 
 namespace PJ_Source_GV.Repositories
 {
@@ -176,11 +177,11 @@ namespace PJ_Source_GV.Repositories
                 SELECT 
                     es.id, es.evaluation_id, es.[desc], es.created_at, es.updated_at, es.created_by, es.updated_by, es.status,
                     ess.standard_id, s.id, s.name,
-                    cc.id AS cell_id, cc.column_id, cc.evaluation_session_id, cc.value, cc.[order], cc.created_at, cc.updated_at, cc.created_by, cc.updated_by
+                    cc.id, cc.column_id, cc.evaluation_session_id, cc.value, cc.[order], cc.created_at, cc.updated_at, cc.created_by, cc.updated_by
                 FROM std_evaluation_session es
                 LEFT JOIN std_evaluation_session_standard ess ON es.id = ess.evaluation_session_id
                 LEFT JOIN std_standard s ON ess.standard_id = s.id
-                LEFT JOIN std_column_cell cc ON es.id = cc.evaluation_session_id
+                LEFT JOIN std_column_cell_history cc ON es.id = cc.evaluation_session_id
                 WHERE es.evaluation_id = @EvaluationId
                 ORDER BY es.id DESC, cc.[order] ASC";
 
@@ -220,7 +221,7 @@ namespace PJ_Source_GV.Repositories
                     return session;
                 },
                 new { EvaluationId = evaluationId },
-                splitOn: "standard_id,cell_id");
+                splitOn: "standard_id,id");
 
             return sessionsDict.Values.ToList();
         }
@@ -242,11 +243,6 @@ namespace PJ_Source_GV.Repositories
                 if (evaluationDto.StartDate >= evaluationDto.EndDate)
                 {
                     throw new ArgumentException("StartDate must be earlier than EndDate.");
-                }
-
-                if (evaluationDto.CreatedBy == null || evaluationDto.UpdatedBy == null)
-                {
-                    throw new ArgumentException("CreatedBy and UpdatedBy are required.");
                 }
 
                 // Insert evaluation
@@ -334,48 +330,138 @@ namespace PJ_Source_GV.Repositories
                     }
                 }
 
-                // // Insert cells
-                // if (sessionDto.Cells?.Any() == true)
-                // {
-                //     for (int i = 0; i < sessionDto.Cells.Count; i++)
-                //     {
-                //         var cell = sessionDto.Cells[i];
-                //         if (cell.ColumnId == null || string.IsNullOrEmpty(cell.Value))
-                //         {
-                //             throw new ArgumentException($"Cell at index {i} is missing ColumnId or Value.");
-                //         }
-                //
-                //         if (cell.CreatedBy == null || cell.UpdatedBy == null)
-                //         {
-                //             throw new ArgumentException($"CreatedBy and UpdatedBy are required for cell at index {i}.");
-                //         }
-                //
-                //         // Validate column_id exists
-                //         var columnExists = await db.ExecuteScalarAsync<int>(
-                //             "SELECT COUNT(*) FROM std_table_column WHERE id = @ColumnId",
-                //             new { cell.ColumnId },
-                //             transaction);
-                //
-                //         if (columnExists == 0)
-                //         {
-                //             throw new ArgumentException($"Invalid ColumnId {cell.ColumnId} for cell at index {i}.");
-                //         }
-                //
-                //         cell.Order = i;
-                //         cell.EvaluationId = evaluationId;
-                //
-                //         var cellSql = @"
-                //             INSERT INTO std_column_cell (column_id, value, [order], created_at, updated_at, created_by, updated_by, evaluation_id)
-                //             OUTPUT INSERTED.id
-                //             VALUES (@ColumnId, @Value, @Order, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @CreatedBy, @UpdatedBy, @EvaluationId)";
-                //
-                //         var cellId = await db.QuerySingleAsync<int>(cellSql, cell, transaction);
-                //         cell.Id = cellId;
-                //     }
-                // }
-
+             
                 transaction.Commit();
                 return sessionId;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                throw new Exception($"Error adding evaluation session: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<int> AddEvaluationValueAsync(EvaluationSessionDto sessionDto, SessionStatus mode)
+        {
+            using var db = Connection;
+            db.Open();
+            using var transaction = db.BeginTransaction();
+            try
+            {
+                 // Insert cells
+                 if (sessionDto.Tables?.Any() == true)
+                {
+                    var sqlDeleteSessionValues = @"
+                        DELETE FROM std_column_cell_history
+                        WHERE evaluation_session_id = @EvaluationSessionId";
+                    await db.ExecuteAsync(sqlDeleteSessionValues, new { EvaluationSessionId = sessionDto.Id }, transaction);
+                    
+                    foreach (var item in sessionDto.Tables)
+                    {
+                        if (sessionDto.Status == SessionStatus.Edit)
+                        {
+                            var sqlTableHistory = @"
+                                INSERT INTO std_standard_table_history (
+                                    table_id,                               
+                                    evaluation_session_id,
+                                    standard_id,
+                                    name,
+                                    created_at,
+                                    updated_at,
+                                    created_by,
+                                    updated_by
+                                )
+                                SELECT
+                                    t.id,
+                                    @EvaluationSessionId,
+                                    t.standard_id,
+                                    t.name,
+                                    t.created_at,
+                                    t.updated_at,
+                                    0,
+                                    0
+                                FROM std_standard_table t
+                                WHERE t.id = @TableId";
+                            await db.ExecuteAsync(sqlTableHistory, new { EvaluationSessionId = sessionDto.Id, TableId = item.tableId }, transaction);
+                            
+                            var sqlTableColumnHistory = @"
+                                 INSERT INTO std_table_column_history (
+                                    column_id,                                  
+                                    table_id,
+                                    evaluation_session_id,
+                                    name,
+                                    [order],
+                                    created_at,
+                                    updated_at,
+                                    created_by,
+                                    updated_by,
+                                    type
+                                )
+                                SELECT
+                                    c.id,
+                                    @TableId,
+                                    @EvaluationSessionId,
+                                    c.name,
+                                    c.[order],
+                                    c.created_at,
+                                    c.updated_at,
+                                    0,
+                                    0,
+                                    c.type
+                                FROM std_table_column c
+                                INNER JOIN std_standard_table t ON c.table_id = t.id
+                                INNER JOIN std_evaluation_session_standard ess ON t.standard_id = ess.standard_id
+                                WHERE c.table_id = @TableId AND ess.evaluation_session_id = @EvaluationSessionId";
+                            await db.ExecuteAsync(sqlTableColumnHistory, new { EvaluationSessionId = sessionDto.Id, TableId = item.tableId }, transaction);
+                        }
+                        
+                        var updateSql = @"UPDATE std_evaluation_session SET status = @Status WHERE id = @Id";
+                        if (mode == SessionStatus.Draft)
+                        {
+                            await db.ExecuteAsync(updateSql, new { sessionDto.Id, Status = SessionStatus.Draft }, transaction);
+                        }
+
+                        if (mode == SessionStatus.Saved)
+                        {
+                            await db.ExecuteAsync(updateSql, new { sessionDto.Id, Status = SessionStatus.Saved }, transaction);
+                        }
+
+                        var rows = item.rows;
+                        if (rows?.Any() == true)
+                        {
+                            var order = 0;
+                            foreach (var row in item.rows)
+                            {
+                                var cells = row.Cells;
+                                if (cells?.Any() == true)
+                                {
+                                    foreach (var cell in cells)
+                                    {
+                                        if (cell.ColumnId == null || string.IsNullOrEmpty(cell.Value))
+                                        {
+                                            throw new ArgumentException($"A cell is missing ColumnId or Value.");
+                                        }
+
+                                        cell.Order = order;
+                                        cell.EvaluationSessionId = sessionDto.Id;
+
+                                        var cellSql = @"
+                                            INSERT INTO std_column_cell_history 
+                                            (column_id, value, [order], created_at, updated_at, created_by, updated_by, evaluation_session_id)
+                                            VALUES 
+                                            (@ColumnId, @Value, @Order, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @CreatedBy, @UpdatedBy, @EvaluationSessionId)";
+            
+                                        await db.ExecuteAsync(cellSql, cell, transaction);
+                                    }
+                                }
+                                order++;
+                            }
+
+                        }
+                    }
+                }
+                transaction.Commit();
+                return sessionDto.Id ?? 0;
             }
             catch (Exception ex)
             {

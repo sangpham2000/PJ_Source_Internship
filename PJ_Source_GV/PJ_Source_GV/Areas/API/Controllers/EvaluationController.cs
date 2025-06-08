@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PJ_Source_GV.Models.Models.Dtos;
+using PJ_Source_GV.Models.Vocabulary;
 using PJ_Source_GV.Repositories;
 
 namespace PJ_Source_GV.Areas.API.Controllers
@@ -104,6 +105,21 @@ namespace PJ_Source_GV.Areas.API.Controllers
             }
 
             var result = await _evaluationRepository.AddSession(request);
+            if (result == 0)
+            {
+                return BadRequest();
+            }
+            return CreatedAtAction(nameof(GetById), new { id = result }, request);
+        }
+        [HttpPost("add-session-value/{mode}")]
+        public async Task<IActionResult> AddSessionValue([FromBody] EvaluationSessionDto request, [FromRoute] SessionStatus mode)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _evaluationRepository.AddEvaluationValueAsync(request, mode);
             if (result == 0)
             {
                 return BadRequest();

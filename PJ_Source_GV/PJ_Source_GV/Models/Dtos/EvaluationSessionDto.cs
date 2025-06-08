@@ -17,4 +17,16 @@ public class EvaluationSessionDto
     public List<int> StandardIds { get; set; } = new List<int>();
     public List<string> StandardNames { get; set; } = new List<string>();
     public List<ColumnCellDto> Cells { get; set; } = new List<ColumnCellDto>();
+    public List<TableRows> Tables { get; set; } = new List<TableRows>();
+}
+
+public class TableRows
+{
+    public int tableId { get; set; }
+    public List<RowColumnCellDto> rows { get; set; }
+}
+
+public class RowColumnCellDto
+{
+    public List<ColumnCellDto> Cells { get; set; } = new List<ColumnCellDto>();
 }
