@@ -15,7 +15,8 @@ public static class StandardMapper
             CreatedAt = entity.created_at,
             UpdatedAt = entity.updated_at,
             CreatedBy = entity.created_by,
-            UpdatedBy = entity.updated_by
+            UpdatedBy = entity.updated_by,
+            TotalCount = entity.total_count,
         };
     }
 
@@ -29,7 +30,8 @@ public static class StandardMapper
             created_at = dto.CreatedAt,
             updated_at = dto.UpdatedAt,
             created_by = dto.CreatedBy,
-            updated_by = dto.UpdatedBy
+            updated_by = dto.UpdatedBy,
+            total_count = dto.TotalCount,
         };
     }
 }

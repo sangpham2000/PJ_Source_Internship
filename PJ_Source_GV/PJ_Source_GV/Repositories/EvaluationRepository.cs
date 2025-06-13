@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using PJ_Source_GV.Models;
 using PJ_Source_GV.Models.Entities;
 using PJ_Source_GV.Models.Mapper;
 using PJ_Source_GV.Models.Models.Dtos;
@@ -80,6 +81,123 @@ namespace PJ_Source_GV.Repositories
                 splitOn: "session_id,standard_id");
 
             return evaluationsDict.Values.ToList();
+        }
+        
+        public async Task<PaginatedResult<EvaluationDto>> GetAllPaginated(EvaluationPaginationRequest request)
+        {
+            using var db = Connection;
+            
+            // Build WHERE clause for filtering
+            var whereClause = "WHERE 1=1";
+            var parameters = new DynamicParameters();
+
+            if (!string.IsNullOrWhiteSpace(request.Name))
+            {
+                whereClause += " AND e.name LIKE @Name";
+                parameters.Add("Name", $"%{request.Name}%");
+            }
+
+            if (request.StartDate.HasValue)
+            {
+                whereClause += " AND e.start_date >= @StartDate";
+                parameters.Add("StartDate", request.StartDate.Value);
+            }
+
+            if (request.EndDate.HasValue)
+            {
+                whereClause += " AND e.end_date <= @EndDate";
+                parameters.Add("EndDate", request.EndDate.Value);
+            }
+
+            // Calculate offset
+            var offset = (request.Page - 1) * request.PageSize;
+            parameters.Add("Offset", offset);
+            parameters.Add("PageSize", request.PageSize);
+
+            // Multi-query: Count + Evaluations + Sessions + Session Standards
+            var multiSql = $@"
+                -- Count total
+                SELECT COUNT(DISTINCT e.id)
+                FROM std_evaluation e
+                {whereClause};
+
+                -- Get paginated evaluations
+                SELECT e.id, e.name, e.[desc], e.start_date, e.end_date, e.created_at, e.updated_at, e.created_by, e.updated_by
+                FROM std_evaluation e
+                {whereClause}
+                ORDER BY e.id
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY;
+
+                -- Get sessions for these evaluations
+                SELECT es.id, es.evaluation_id, es.created_at, es.updated_at, es.created_by, es.updated_by, es.[desc] as description
+                FROM std_evaluation_session es
+                WHERE es.evaluation_id IN (
+                    SELECT e.id
+                    FROM std_evaluation e
+                    {whereClause}
+                    ORDER BY e.id
+                    OFFSET @Offset ROWS
+                    FETCH NEXT @PageSize ROWS ONLY
+                )
+                ORDER BY es.evaluation_id, es.id;
+
+                -- Get session standards for these sessions
+                SELECT ess.evaluation_session_id, ess.standard_id
+                FROM std_evaluation_session_standard ess
+                WHERE ess.evaluation_session_id IN (
+                    SELECT es.id
+                    FROM std_evaluation_session es
+                    WHERE es.evaluation_id IN (
+                        SELECT e.id
+                        FROM std_evaluation e
+                        {whereClause}
+                        ORDER BY e.id
+                        OFFSET @Offset ROWS
+                        FETCH NEXT @PageSize ROWS ONLY
+                    )
+                )
+                ORDER BY ess.evaluation_session_id;";
+
+            using var multi = await db.QueryMultipleAsync(multiSql, parameters);
+            
+            // Read results
+            var totalCount = await multi.ReadSingleAsync<int>();
+            var evaluations = await multi.ReadAsync<EvaluationEntity>();
+            var sessions = await multi.ReadAsync<EvaluationSessionEntity>();
+            var sessionStandards = await multi.ReadAsync<EvaluationSessionStandardEntity>();
+            
+            var evaluationDtos = new List<EvaluationDto>();
+            
+            foreach (var evaluation in evaluations)
+            {
+                var evaluationDto = EvaluationMapper.ToDto(evaluation);
+                evaluationDto.Sessions = new List<EvaluationSessionDto>();
+                
+                var evaluationSessions = sessions.Where(s => s.evaluation_id == evaluation.id);
+                foreach (var session in evaluationSessions)
+                {
+                    var sessionDto = EvaluationSessionMapper.ToDto(session);
+                    sessionDto.StandardIds = new List<int>();
+                    var sessionStandardIds = sessionStandards
+                        .Where(ss => ss.evaluation_session_id == session.id)
+                        .Select(ss => ss.standard_id)
+                        .ToList();
+                    
+                    sessionDto.StandardIds.AddRange(sessionStandardIds);
+                    evaluationDto.Sessions.Add(sessionDto);
+                }
+                
+                evaluationDtos.Add(evaluationDto);
+            }
+
+            return new PaginatedResult<EvaluationDto>
+            {
+                Items = evaluationDtos,
+                TotalCount = totalCount,
+                Page = request.Page,
+                PageSize = request.PageSize
+            };
         }
 
         public async Task<EvaluationDto?> GetById(int id)

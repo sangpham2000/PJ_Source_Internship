@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using PJ_Source_GV.Models;
 using PJ_Source_GV.Models.Models.Dtos;
 using PJ_Source_GV.Repositories;
 
@@ -19,13 +20,22 @@ public class StandardController : Controller
     {
         _standardRepository = standardRepository;
     }
+    
     [HttpGet]
-    public async Task<IActionResult> GetAllGroup()
+    public async Task<IActionResult> GetAllPaginated([FromQuery] PaginationRequest request)
     {
-        var items = await _standardRepository.GetAll();
-        if (items.Any())
+        // Validate pagination parameters
+        if (request.Page < 1)
+            request.Page = 1;
+    
+        if (request.PageSize < 1 || request.PageSize > 100)
+            request.PageSize = 10;
+
+        var result = await _standardRepository.GetAllPaginated(request);
+    
+        if (result.Items.Any())
         {
-            return Ok(items);
+            return Ok(result);
         }
 
         return NoContent();

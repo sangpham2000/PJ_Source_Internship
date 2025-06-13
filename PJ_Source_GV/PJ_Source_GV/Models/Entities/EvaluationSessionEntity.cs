@@ -14,3 +14,4 @@ public class EvaluationSessionEntity
     public int? updated_by { get; set; }
     public SessionStatus? status { get; set; }
 }
+

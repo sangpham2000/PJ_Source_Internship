@@ -7,6 +7,7 @@ Vue.component("app-container", {
         @create="showCreateStandardModal"
         @edit="editStandard"
         @remove="removeStandard"
+        @search="updateSearch"
       />
       <standard-editor
         v-if="currentPage === 'edit-standard'"
@@ -48,6 +49,17 @@ Vue.component("app-container", {
       currentStandard: { id: "", name: "", tables: [] },
       editingColumn: { tableIndex: -1, columnIndex: -1, name: "", isNew: true },
       showLoading: false,
+      // Pagination properties
+      currentPageValue: 1,
+      pageSize: 10,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+      // Filter properties
+      searchName: "",
+      // Debounce timer for search
+      searchTimer: null,
     };
   },
   created() {
@@ -75,19 +87,50 @@ Vue.component("app-container", {
         return response.json();
       }
     },
-    async fetchStandards() {
+    updateSearch(searchValue) {
+      this.searchQuery = searchValue;
+      clearTimeout(this.searchTimer);
+      this.searchTimer = setTimeout(() => {
+        this.fetchStandards(this.currentPageValue, this.itemsPerPage, this.searchQuery);
+      }, 500);
+    },
+    async fetchStandards(page = 1, pageSize = 10, name = "") {
       this.showLoading = true;
       try {
-        const items = await this.apiRequest(
-          "http://localhost:28635/API/standard",
-          "GET"
+        // Build query parameters
+        const params = new URLSearchParams({
+          page: page.toString(),
+          pageSize: pageSize.toString(),
+        });
+
+        // Add name filter if provided
+        if (name && name.trim()) {
+          params.append("name", name.trim());
+        }
+
+        const response = await this.apiRequest(
+            `http://localhost:28635/API/standard?${params.toString()}`,
+            "GET"
         );
-        this.standards = [...items];
+
+        // Update data with paginated response
+        this.standards = [...response.items];
+        this.currentPageValue = response.page;
+        this.pageSize = response.pageSize;
+        this.totalCount = response.totalCount;
+        this.totalPages = response.totalPages;
+        this.hasNextPage = response.hasNextPage;
+        this.hasPreviousPage = response.hasPreviousPage;
+
         this.showLoading = false;
-        console.log("Standards fetched:", items);
+        console.log("Standards fetched:", response);
       } catch (err) {
         this.showLoading = false;
         console.error("Lỗi khi lấy standards:", err);
+        // Reset data on error
+        this.standards = [];
+        this.totalCount = 0;
+        this.totalPages = 0;
       }
     },
     backToList() {
@@ -126,9 +169,9 @@ Vue.component("app-container", {
     async saveStandard(updated) {
       try {
         const savedStandard = await this.apiRequest(
-          "http://localhost:28635/api/standard",
-          updated.id ? "PUT" : "POST",
-          updated
+            "http://localhost:28635/api/standard",
+            updated.id ? "PUT" : "POST",
+            updated
         );
         const idx = this.standards.findIndex((s) => s.id === updated.id);
         if (idx >= 0) {
@@ -145,8 +188,8 @@ Vue.component("app-container", {
     async removeStandard(standard) {
       try {
         await this.apiRequest(
-          `http://localhost:28635/api/standard/${standard.id}`,
-          "DELETE"
+            `http://localhost:28635/api/standard/${standard.id}`,
+            "DELETE"
         );
         this.fetchStandards();
       } catch (error) {
@@ -177,8 +220,8 @@ Vue.component("app-container", {
         });
       } else {
         this.currentStandard.tables[col.tableIndex].columns[
-          col.columnIndex
-        ].name = col.name;
+            col.columnIndex
+            ].name = col.name;
       }
       this.showModal = null;
     },

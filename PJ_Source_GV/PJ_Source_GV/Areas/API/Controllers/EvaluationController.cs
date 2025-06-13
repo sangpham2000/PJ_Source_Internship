@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using PJ_Source_GV.Models;
 using PJ_Source_GV.Models.Models.Dtos;
 using PJ_Source_GV.Models.Vocabulary;
 using PJ_Source_GV.Repositories;
@@ -20,14 +21,33 @@ namespace PJ_Source_GV.Areas.API.Controllers
             _evaluationRepository = evaluationRepository;
         }
 
+        // [HttpGet]
+        // public async Task<IActionResult> GetAll()
+        // {
+        //     var items = await _evaluationRepository.GetAll();
+        //     if (items.Count != 0)
+        //     {
+        //         return Ok(items);
+        //     }
+        //     return NoContent();
+        // }
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllPaginated([FromQuery] EvaluationPaginationRequest request)
         {
-            var items = await _evaluationRepository.GetAll();
-            if (items.Count != 0)
+            // Validate pagination parameters
+            if (request.Page < 1)
+                request.Page = 1;
+        
+            if (request.PageSize < 1 || request.PageSize > 100)
+                request.PageSize = 10;
+        
+            var result = await _evaluationRepository.GetAllPaginated(request);
+        
+            if (result.Items.Any())
             {
-                return Ok(items);
+                return Ok(result);
             }
+        
             return NoContent();
         }
 

@@ -13,7 +13,7 @@ public class StandardDto
     public DateTime? UpdatedAt { get; set; }
     public int? CreatedBy { get; set; }
     public int? UpdatedBy { get; set; }
-    
+    public int? TotalCount { get; set; }
     public List<StandardTableDto?> Tables { get; set; } = new List<StandardTableDto?>();
 }
 

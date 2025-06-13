@@ -11,4 +11,5 @@ public class StandardEntity
     public DateTime? updated_at { get; set; }
     public int? created_by { get; set; }
     public int? updated_by { get; set; }
+    public int? total_count { get; set; }
 }

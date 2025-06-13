@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using PJ_Source_GV.Models;
 using PJ_Source_GV.Models.Entities;
 using PJ_Source_GV.Models.Mapper;
 using PJ_Source_GV.Models.Models.Dtos;
@@ -22,79 +23,113 @@ public class StandardRepository : IStandardRepository
     }
 
     private IDbConnection Connection => new SqlConnection(_connectionString);
-
-    public async Task<List<StandardDto>> GetAll()
+    public async Task<PaginatedResult<StandardDto>> GetAllPaginated(PaginationRequest request)
     {
         using var db = Connection;
-        var standardsDict = new Dictionary<int, StandardDto>();
+        
+        // Build WHERE clause for filtering
+        var whereClause = "WHERE 1=1";
+        var parameters = new DynamicParameters();
 
-        var sql = @"
-            SELECT 
-                s.id, s.name, s.normalized_name, s.created_at, s.updated_at, s.created_by, s.updated_by,
-                t.id, t.standard_id, t.name, 
-                t.created_at, t.updated_at, 
-                t.created_by, t.updated_by,
-                c.id, c.table_id, c.name, c.[order], 
-                c.type, c.created_at, 
-                c.updated_at, c.created_by, 
-                c.updated_by
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            whereClause += " AND s.name LIKE @Name";
+            parameters.Add("Name", $"%{request.Name}%");
+        }
+
+        // Calculate offset
+        var offset = (request.Page - 1) * request.PageSize;
+        parameters.Add("Offset", offset);
+        parameters.Add("PageSize", request.PageSize);
+
+        // Multi-query: Count + Standards + Tables + Columns
+        var multiSql = $@"
+            -- Count total
+            SELECT COUNT(DISTINCT s.id)
             FROM std_standard s
-            LEFT JOIN std_standard_table t ON s.id = t.standard_id
-            LEFT JOIN std_table_column c ON t.id = c.table_id
-            ORDER BY s.id, t.id, c.[order]";
+            {whereClause};
 
-        await db.QueryAsync<StandardEntity, StandardTableEntity, TableColumnEntity, StandardEntity>(
-            sql,
-            (standard, table, column) =>
+            -- Get paginated standards
+            SELECT s.id, s.name, s.normalized_name, s.created_at, s.updated_at, s.created_by, s.updated_by
+            FROM std_standard s
+            {whereClause}
+            ORDER BY s.id
+            OFFSET @Offset ROWS
+            FETCH NEXT @PageSize ROWS ONLY;
+
+            -- Get tables for these standards
+            SELECT t.id, t.standard_id, t.name, t.created_at, t.updated_at, t.created_by, t.updated_by
+            FROM std_standard_table t
+            WHERE t.standard_id IN (
+                SELECT s.id
+                FROM std_standard s
+                {whereClause}
+                ORDER BY s.id
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY
+            );
+
+            -- Get columns for these tables
+            SELECT c.id, c.table_id, c.name, c.[order], c.type, c.created_at, c.updated_at, c.created_by, c.updated_by
+            FROM std_table_column c
+            WHERE c.table_id IN (
+                SELECT t.id
+                FROM std_standard_table t
+                WHERE t.standard_id IN (
+                    SELECT s.id
+                    FROM std_standard s
+                    {whereClause}
+                    ORDER BY s.id
+                    OFFSET @Offset ROWS
+                    FETCH NEXT @PageSize ROWS ONLY
+                )
+            )
+            ORDER BY c.[order];";
+
+        using var multi = await db.QueryMultipleAsync(multiSql, parameters);
+        
+        // Read results
+        var totalCount = await multi.ReadSingleAsync<int>();
+        var standards = await multi.ReadAsync<StandardEntity>();
+        var tables = await multi.ReadAsync<StandardTableEntity>();
+        var columns = await multi.ReadAsync<TableColumnEntity>();
+
+        // Build DTOs
+        var standardDtos = new List<StandardDto>();
+        
+        foreach (var standard in standards)
+        {
+            var standardDto = StandardMapper.ToDto(standard);
+            standardDto.Tables = new List<StandardTableDto>();
+            
+            // Add tables for this standard
+            var standardTables = tables.Where(t => t.standard_id == standard.id);
+            foreach (var table in standardTables)
             {
-                if (standard?.id == null)
-                    return standard;
-
-                // Get or create StandardDto
-                if (!standardsDict.TryGetValue(standard.id.Value, out var standardDto))
+                var tableDto = StandardTableMapper.ToDto(table);
+                tableDto.Columns = new List<TableColumnDto>();
+                
+                // Add columns for this table
+                var tableColumns = columns.Where(c => c.table_id == table.id);
+                foreach (var column in tableColumns)
                 {
-                    standardDto = StandardMapper.ToDto(standard);
-                    standardDto.Tables = new List<StandardTableDto>();
-                    standardsDict.Add(standard.id.Value, standardDto);
+                    var columnDto = TableColumnMapper.ToDto(column);
+                    tableDto.Columns.Add(columnDto);
                 }
+                
+                standardDto.Tables.Add(tableDto);
+            }
+            
+            standardDtos.Add(standardDto);
+        }
 
-                // Process table if it exists
-                if (table?.id != null)
-                {
-                    // Look for existing table in the current standard
-                    var existingTable = standardDto.Tables
-                        .FirstOrDefault(t => t?.Id == table.id);
-
-                    // If table doesn't exist yet, add it to the standard
-                    if (existingTable == null)
-                    {
-                        var tableDto = StandardTableMapper.ToDto(table);
-                        tableDto.Columns = new List<TableColumnDto>();
-                        standardDto.Tables.Add(tableDto);
-                        existingTable = tableDto;
-                    }
-
-                    // Process column if it exists
-                    if (column?.id != null && existingTable != null)
-                    {
-                        // Check if column already exists in the table
-                        bool columnExists = existingTable.Columns
-                            .Any(c => c?.Id == column.id);
-
-                        // Only add the column if it doesn't already exist
-                        if (!columnExists)
-                        {
-                            var columnDto = TableColumnMapper.ToDto(column);
-                            existingTable.Columns.Add(columnDto);
-                        }
-                    }
-                }
-
-                return standard;
-            },
-            splitOn: "id,id");
-
-        return standardsDict.Values.ToList();
+        return new PaginatedResult<StandardDto>
+        {
+            Items = standardDtos,
+            TotalCount = totalCount,
+            Page = request.Page,
+            PageSize = request.PageSize
+        };
     }
 
     public async Task<StandardDto?> GetById(int id)

@@ -3,7 +3,6 @@ Vue.component("app-container", {
     <div class="container-fluid">
       <evaluations-list
         v-if="currentPage === 'evaluations-list'"
-        :evaluations="evaluations"
         @create="showCreateEvaluationModal"
         @edit="editEvaluation"
       />
@@ -41,45 +40,7 @@ Vue.component("app-container", {
       showLoading: false,
     };
   },
-  created() {
-    this.fetchEvaluations();
-  },
   methods: {
-    async apiRequest(url, method = "GET", data = null) {
-      const options = {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      if (data) {
-        options.body = JSON.stringify(data);
-      }
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-      if (response.status === 204 || response.status === 201) {
-        return null;
-      } else {
-        return response.json();
-      }
-    },
-    async fetchEvaluations() {
-      this.showLoading = true;
-      try {
-        const items = await this.apiRequest(
-          "http://localhost:28635/API/evaluation",
-          "GET"
-        );
-        this.evaluations = [...items];
-        this.showLoading = false;
-      } catch (err) {
-        this.showLoading = false;
-        console.error("Lỗi khi lấy evaluations:", err);
-      }
-    },
     showCreateEvaluationModal() {
       this.showModal = "create-evaluation";
     },
