@@ -109,14 +109,15 @@ Vue.component("modal-create-evaluation", {
       if (!this.newEvaluation.name.trim()) {
         this.errors.name = "Vui lòng nhập tên đợt đánh giá";
         isValid = false;
-      } else if (
-        this.evaluations.some(
-          (e) => e.name.toLowerCase() === this.newEvaluation.name.toLowerCase()
-        )
-      ) {
-        this.errors.name = "Tên đợt đánh giá đã tồn tại";
-        isValid = false;
       }
+      // else if (
+      //   this.evaluations.some(
+      //     (e) => e.name.toLowerCase() === this.newEvaluation.name.toLowerCase()
+      //   )
+      // ) {
+      //   this.errors.name = "Tên đợt đánh giá đã tồn tại";
+      //   isValid = false;
+      // }
       if (!this.newEvaluation.startDate) {
         this.errors.startDate = "Vui lòng chọn thời gian bắt đầu";
         isValid = false;
@@ -125,8 +126,8 @@ Vue.component("modal-create-evaluation", {
         this.errors.endDate = "Vui lòng chọn thời gian kết thúc";
         isValid = false;
       } else if (
-        this.newEvaluation.startDate &&
-        this.newEvaluation.endDate < this.newEvaluation.startDate
+          this.newEvaluation.startDate &&
+          this.newEvaluation.endDate < this.newEvaluation.startDate
       ) {
         this.errors.endDate = "Thời gian kết thúc phải sau thời gian bắt đầu";
         isValid = false;
@@ -156,9 +157,9 @@ Vue.component("modal-create-evaluation", {
       console.log(updated);
       try {
         await this.apiRequest(
-          "http://localhost:28635/api/evaluation",
-          updated.id ? "PUT" : "POST",
-          updated
+            "http://localhost:28635/api/evaluation",
+            updated.id ? "PUT" : "POST",
+            updated
         );
       } catch (error) {
         console.error("Error saving evoluation:", error);

@@ -8,6 +8,7 @@ public class EvaluationSessionEntity
     public int? id { get; set; }
     public int? evaluation_id { get; set; }
     public string? desc { get; set; }
+    public string? assigned_departments { get; set; }
     public DateTime? created_at { get; set; }
     public DateTime? updated_at { get; set; }
     public int? created_by { get; set; }

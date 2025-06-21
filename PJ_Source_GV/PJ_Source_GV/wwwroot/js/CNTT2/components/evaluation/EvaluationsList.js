@@ -38,7 +38,7 @@ Vue.component("evaluations-list", {
             </div>
             <div class="panel-footer">
               <button class="btn btn-sm btn-primary" @click="onEdit(evaluation)">
-                Xem dữ liệu đánh giá
+                Xem các phiên đánh giá
               </button>
               <button class="btn btn-sm btn-danger pull-right" @click="showConfirmDelete(evaluation.name)"><i class="fa fa-trash"></i> Xóa</button>
             </div>

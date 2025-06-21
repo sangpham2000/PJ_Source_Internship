@@ -9,6 +9,7 @@ public class EvaluationSessionDto
     public int? Id { get; set; }
     public int? EvaluationId { get; set; }
     public string? Desc { get; set; }
+    public string? AssignedDepartments { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public int? CreatedBy { get; set; }

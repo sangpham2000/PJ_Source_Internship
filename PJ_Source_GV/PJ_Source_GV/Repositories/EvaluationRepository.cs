@@ -293,7 +293,7 @@ namespace PJ_Source_GV.Repositories
 
             var sql = @"
                 SELECT 
-                    es.id, es.evaluation_id, es.[desc], es.created_at, es.updated_at, es.created_by, es.updated_by, es.status,
+                    es.id, es.evaluation_id, es.[desc], es.assigned_departments, es.created_at, es.updated_at, es.created_by, es.updated_by, es.status,
                     ess.standard_id, s.id, s.name,
                     cc.id, cc.column_id, cc.evaluation_session_id, cc.value, cc.[order], cc.created_at, cc.updated_at, cc.created_by, cc.updated_by
                 FROM std_evaluation_session es
@@ -403,14 +403,15 @@ namespace PJ_Source_GV.Repositories
 
                 // Insert evaluation session
                 var sessionSql = @"
-                    INSERT INTO std_evaluation_session (evaluation_id, [desc], created_at, updated_at, created_by, updated_by, status)
+                    INSERT INTO std_evaluation_session (evaluation_id, [desc], assigned_departments, created_at, updated_at, created_by, updated_by, status)
                     OUTPUT INSERTED.id
-                    VALUES (@EvaluationId, @Desc, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @CreatedBy, @UpdatedBy, 0)";
+                    VALUES (@EvaluationId, @Desc, @AssignedDepartments, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, @CreatedBy, @UpdatedBy, 0)";
 
                 var sessionId = await db.QuerySingleAsync<int>(sessionSql, new
                 {
                     EvaluationId = sessionDto.EvaluationId ,
                     sessionDto.Desc,
+                    sessionDto.AssignedDepartments,
                     sessionDto.CreatedBy,
                     sessionDto.UpdatedBy
                 }, transaction);
@@ -555,7 +556,7 @@ namespace PJ_Source_GV.Repositories
                                 {
                                     foreach (var cell in cells)
                                     {
-                                        if (cell.ColumnId == null || string.IsNullOrEmpty(cell.Value))
+                                        if (cell.ColumnId == null)
                                         {
                                             throw new ArgumentException($"A cell is missing ColumnId or Value.");
                                         }

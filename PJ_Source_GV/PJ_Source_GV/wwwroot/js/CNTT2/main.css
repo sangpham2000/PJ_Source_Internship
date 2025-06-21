@@ -1,7 +1,9 @@
 :root {
   --success-color: #48bb78;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  /* --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); */
+  --shadow: unset;
+
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
   0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -85,11 +87,11 @@ body {
 /* Panel as Card */
 .panel {
   border-radius: var(--border-radius);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: var(--shadow-lg);
+  border: 1px solid #ccc;
+  /* box-shadow: var(--shadow-lg); */
   margin-bottom: 24px;
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  /* backdrop-filter: blur(20px); */
   -webkit-backdrop-filter: blur(20px);
   transition: var(--transition);
   overflow: hidden;
@@ -208,7 +210,8 @@ body {
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   border: none;
-  overflow: hidden;
+  overflow: auto;
+  max-height: 95vh;;
 }
 
 .modal-header {
@@ -216,7 +219,11 @@ body {
   color: #ffffff;
   border: none;
   padding: 20px 25px;
-  position: relative;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
 }
 
 .modal-header::before {
@@ -253,6 +260,10 @@ body {
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   padding: 20px 25px;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 /* Form */
@@ -261,7 +272,6 @@ body {
   box-shadow: none;
   transition: all 0.2s ease;
   border: 1px solid #cbd5e0;
-  padding: 10px 12px;
   font-size: 14px;
 }
 
