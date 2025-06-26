@@ -435,7 +435,7 @@ Vue.component("session-modal", {
         }
 
         const response = await this.apiRequest(
-          `http://localhost:28635/API/standard?${params.toString()}`,
+          `/API/standard?${params.toString()}`,
           "GET"
         );
         this.standards = [...response.items];
@@ -569,7 +569,7 @@ Vue.component("session-modal", {
         // console.log("sessionData", sessionData);
         // return;
         await this.apiRequest(
-          "http://localhost:28635/API/evaluation/session",
+          "/API/evaluation/session",
           "POST",
           sessionData
         );

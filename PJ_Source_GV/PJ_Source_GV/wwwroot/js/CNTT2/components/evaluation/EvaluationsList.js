@@ -140,7 +140,7 @@ Vue.component("evaluations-list", {
           params.append("name", name.trim());
         }
         const response = await this.apiRequest(
-          `http://localhost:28635/API/evaluation?${params.toString()}`,
+          `/API/evaluation?${params.toString()}`,
           "GET"
         );
         this.evaluations = [...response.items];

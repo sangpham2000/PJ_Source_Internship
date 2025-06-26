@@ -157,7 +157,7 @@ Vue.component("modal-create-evaluation", {
       console.log(updated);
       try {
         await this.apiRequest(
-          "http://localhost:28635/api/evaluation",
+          "/api/evaluation",
           updated.id ? "PUT" : "POST",
           updated
         );

@@ -113,7 +113,7 @@ Vue.component("app-container", {
         }
 
         const response = await this.apiRequest(
-          `http://localhost:28635/API/standard?${params.toString()}`,
+          `/API/standard?${params.toString()}`,
           "GET"
         );
 
@@ -173,7 +173,7 @@ Vue.component("app-container", {
     async saveStandard(updated) {
       try {
         const savedStandard = await this.apiRequest(
-          "http://localhost:28635/api/standard",
+          "/api/standard",
           updated.id ? "PUT" : "POST",
           updated
         );
@@ -192,7 +192,7 @@ Vue.component("app-container", {
     async removeStandard(standard) {
       try {
         await this.apiRequest(
-          `http://localhost:28635/api/standard/${standard.id}`,
+          `/api/standard/${standard.id}`,
           "DELETE"
         );
         this.fetchStandards();
