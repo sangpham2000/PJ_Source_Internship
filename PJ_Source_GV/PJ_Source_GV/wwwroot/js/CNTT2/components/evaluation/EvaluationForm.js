@@ -100,13 +100,20 @@ Vue.component("evaluation-form", {
                           :placeholder="'Nhập ' + column.name"
                         />
                         <input
-                          v-if="column.type === inputType.number || column.type === inputType.dateTime"
+                          v-if="column.type === inputType.number"
                           type="number"
                           class="form-control"
                           v-model.number="row.cells[column.id].value"
                           :placeholder="'Nhập ' + column.name"
                           :min="0"
                           :max="column.type === inputType.number ? '' : row.cells[table.columns.find(c => c.type === inputType.number)?.id]?.value || 100"
+                        />
+                        <input
+                          v-if="column.type === inputType.dateTime"
+                          type="date"
+                          class="form-control"
+                          v-model="row.cells[column.id].value"
+                          :placeholder="'Nhập ' + column.name"
                         />
                         <div
                           class="error-message"
@@ -330,6 +337,7 @@ Vue.component("evaluation-form", {
     onBack() {
       if (this.editSessionMode) {
         this.editSessionMode = false;
+        this.fetchSessions();
         return;
       }
       this.$emit("back");
@@ -357,7 +365,7 @@ Vue.component("evaluation-form", {
           if (this.currenSession?.cells?.length > 0) {
             // Lọc các cell theo table hiện tại
             const tableCells = this.currenSession.cells.filter((cell) =>
-                columns.some((col) => col.id === cell.columnId)
+              columns.some((col) => col.id === cell.columnId)
             );
 
             if (tableCells.length > 0) {
@@ -372,9 +380,9 @@ Vue.component("evaluation-form", {
                 const rowCells = sortedCells.slice(i, i + columnsPerRow);
                 const rowIndex = Math.floor(i / columnsPerRow);
                 const order =
-                    rowCells[0]?.order !== undefined
-                        ? rowCells[0].order
-                        : rowIndex;
+                  rowCells[0]?.order !== undefined
+                    ? rowCells[0].order
+                    : rowIndex;
 
                 const row = {
                   id: `row_${tableId}_${rowIndex + 1}`,
@@ -426,14 +434,14 @@ Vue.component("evaluation-form", {
       }, {});
 
       console.log(
-          "this.currenSession cells:",
-          JSON.stringify(this.currenSession?.cells, null, 2),
-          this.currenSession?.cells
+        "this.currenSession cells:",
+        JSON.stringify(this.currenSession?.cells, null, 2),
+        this.currenSession?.cells
       );
       console.log(
-          "sessionData:",
-          JSON.stringify(this.sessionData, null, 2),
-          this.sessionData
+        "sessionData:",
+        JSON.stringify(this.sessionData, null, 2),
+        this.sessionData
       );
 
       this.sessionNote = "";
@@ -487,13 +495,13 @@ Vue.component("evaluation-form", {
     async fetchSessions() {
       try {
         const sessions = await this.apiRequest(
-            `http://localhost:28635/API/evaluation/session/${this.selectedEvaluation.id}`
+          `http://localhost:28635/API/evaluation/session/${this.selectedEvaluation.id}`
         );
         if (Array.isArray(sessions)) {
           this.evaluationSessions = sessions.map((session) => ({
             ...session,
             assignedDepartments: JSON.parse(
-                session.assignedDepartments || "[]"
+              session.assignedDepartments || "[]"
             ),
           }));
         }
@@ -515,7 +523,7 @@ Vue.component("evaluation-form", {
     },
     addRow(tableId) {
       const standard = this.sessionForm.standards.find((std) =>
-          std.tables.some((t) => t.id === tableId)
+        std.tables.some((t) => t.id === tableId)
       );
       const table = standard.tables.find((t) => t.id === tableId);
       this.sessionData[tableId].push({
@@ -540,8 +548,8 @@ Vue.component("evaluation-form", {
     },
     confirmDeleteRow() {
       this.sessionData[this.confirmDeleteTableId].splice(
-          this.confirmDeleteRowIndex,
-          1
+        this.confirmDeleteRowIndex,
+        1
       );
 
       this.sessionData[this.confirmDeleteTableId].forEach((row, index) => {
@@ -574,12 +582,12 @@ Vue.component("evaluation-form", {
             this.sessionData[table.id].forEach((row, rowIndex) => {
               table.columns.forEach((column) => {
                 const isNoteField =
-                    (column.name &&
-                        column.name.toLowerCase().includes("ghi chú")) ||
-                    column.name.toLowerCase().includes("chú thích") ||
-                    column.name.toLowerCase().includes("note") ||
-                    column.name.toLowerCase().includes("comment") ||
-                    column.name.toLowerCase().includes("remark");
+                  (column.name &&
+                    column.name.toLowerCase().includes("ghi chú")) ||
+                  column.name.toLowerCase().includes("chú thích") ||
+                  column.name.toLowerCase().includes("note") ||
+                  column.name.toLowerCase().includes("comment") ||
+                  column.name.toLowerCase().includes("remark");
 
                 if (isNoteField) {
                   return; // Skip validation for this column
@@ -592,7 +600,7 @@ Vue.component("evaluation-form", {
                   if (!this.errors.data[table.id][rowIndex])
                     this.errors.data[table.id][rowIndex] = {};
                   this.errors.data[table.id][rowIndex][column.id] =
-                      "Vui lòng nhập dữ liệu";
+                    "Vui lòng nhập dữ liệu";
                   isValid = false;
                   console.log(this.errors, "gdfgsdfg");
                 } else if (column.type === this.inputType.dateTime) {
@@ -611,16 +619,16 @@ Vue.component("evaluation-form", {
                   }
                   */
                 } else if (
-                    (column.type === this.inputType.number ||
-                        column.type === this.inputType.dateTime) &&
-                    value < 0
+                  (column.type === this.inputType.number ||
+                    column.type === this.inputType.dateTime) &&
+                  value < 0
                 ) {
                   if (!this.errors.data[table.id])
                     this.errors.data[table.id] = {};
                   if (!this.errors.data[table.id][rowIndex])
                     this.errors.data[table.id][rowIndex] = {};
                   this.errors.data[table.id][rowIndex][column.id] =
-                      "Điểm không được nhỏ hơn 0";
+                    "Điểm không được nhỏ hơn 0";
                   isValid = false;
                 }
               });
@@ -653,21 +661,21 @@ Vue.component("evaluation-form", {
           // Uncomment to enable API submission
 
           let tempCurrenSession = JSON.parse(
-              JSON.stringify(this.currenSession)
+            JSON.stringify(this.currenSession)
           );
           tempCurrenSession.assignedDepartments = JSON.stringify(
-              tempCurrenSession.assignedDepartments
+            tempCurrenSession.assignedDepartments
           );
 
           await this.apiRequest(
-              `http://localhost:28635/API/evaluation/add-session-value/${
-                  mode === "draft" ? 1 : 2
-              }`,
-              "POST",
-              {
-                ...tempCurrenSession,
-                ...evaluationData,
-              }
+            `http://localhost:28635/API/evaluation/add-session-value/${
+              mode === "draft" ? 1 : 2
+            }`,
+            "POST",
+            {
+              ...tempCurrenSession,
+              ...evaluationData,
+            }
           );
           if (mode === "draft") {
             toastr.success("Đã lưu nháp!");
@@ -733,11 +741,11 @@ Vue.component("evaluation-form", {
       }
       try {
         const standards = await this.apiRequest(
-            `http://localhost:28635/api/standard/GetByIds${
-                item.id && item.status !== 0 ? `/${item.id}` : ""
-            }`,
-            "POST",
-            item.standardIds
+          `http://localhost:28635/api/standard/GetByIds${
+            item.id && item.status !== 0 ? `/${item.id}` : ""
+          }`,
+          "POST",
+          item.standardIds
         );
         this.configSessionForm(standards);
       } catch (err) {
@@ -770,14 +778,14 @@ Vue.component("evaluation-form", {
       const halfLength = Math.floor(availableLength / 2);
 
       const shortStandard =
-          standardName.length > halfLength
-              ? standardName.substring(0, halfLength - 1) + "…"
-              : standardName;
+        standardName.length > halfLength
+          ? standardName.substring(0, halfLength - 1) + "…"
+          : standardName;
 
       const shortTable =
-          tableName.length > halfLength
-              ? tableName.substring(0, halfLength - 1) + "…"
-              : tableName;
+        tableName.length > halfLength
+          ? tableName.substring(0, halfLength - 1) + "…"
+          : tableName;
 
       return `${shortStandard}${separator}${shortTable}`;
     },
@@ -945,9 +953,9 @@ Vue.component("evaluation-form", {
     // Hàm helper
     getTotalTables() {
       return (
-          this.sessionForm?.standards?.reduce((total, standard) => {
-            return total + (standard.tables?.length || 0);
-          }, 0) || 0
+        this.sessionForm?.standards?.reduce((total, standard) => {
+          return total + (standard.tables?.length || 0);
+        }, 0) || 0
       );
     },
 
@@ -982,7 +990,7 @@ Vue.component("evaluation-form", {
             // Add data rows
             this.sessionData[table.id].forEach((row) => {
               const rowData = table.columns.map(
-                  (col) => row.cells[col.id].value || ""
+                (col) => row.cells[col.id].value || ""
               );
               wsData.push(rowData);
             });
@@ -1042,11 +1050,11 @@ Vue.component("evaluation-form", {
 
         // Generate filename with timestamp
         const timestamp = new Date()
-            .toISOString()
-            .slice(0, 19)
-            .replace(/:/g, "-");
+          .toISOString()
+          .slice(0, 19)
+          .replace(/:/g, "-");
         const filename = `${
-            this.selectedEvaluation?.name || "Evaluation"
+          this.selectedEvaluation?.name || "Evaluation"
         }_${timestamp}.xlsx`;
 
         // Download file

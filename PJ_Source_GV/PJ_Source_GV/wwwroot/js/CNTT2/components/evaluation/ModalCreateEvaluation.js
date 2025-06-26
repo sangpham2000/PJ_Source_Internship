@@ -31,7 +31,7 @@ Vue.component("modal-create-evaluation", {
                 <textarea
                   class="form-control"
                   id="evaluationDescription"
-                  v-model="newEvaluation.description"
+                  v-model="newEvaluation.desc"
                   placeholder="Mô tả chi tiết về đợt đánh giá"
                   rows="3"
                 ></textarea>
@@ -68,7 +68,7 @@ Vue.component("modal-create-evaluation", {
     return {
       newEvaluation: {
         name: "",
-        description: "",
+        desc: "",
         startDate: "",
         endDate: "",
       },
@@ -109,7 +109,7 @@ Vue.component("modal-create-evaluation", {
       if (!this.newEvaluation.name.trim()) {
         this.errors.name = "Vui lòng nhập tên đợt đánh giá";
         isValid = false;
-      }
+      } 
       // else if (
       //   this.evaluations.some(
       //     (e) => e.name.toLowerCase() === this.newEvaluation.name.toLowerCase()
@@ -126,8 +126,8 @@ Vue.component("modal-create-evaluation", {
         this.errors.endDate = "Vui lòng chọn thời gian kết thúc";
         isValid = false;
       } else if (
-          this.newEvaluation.startDate &&
-          this.newEvaluation.endDate < this.newEvaluation.startDate
+        this.newEvaluation.startDate &&
+        this.newEvaluation.endDate < this.newEvaluation.startDate
       ) {
         this.errors.endDate = "Thời gian kết thúc phải sau thời gian bắt đầu";
         isValid = false;
@@ -136,7 +136,7 @@ Vue.component("modal-create-evaluation", {
       if (isValid) {
         const evaluation = {
           name: this.newEvaluation.name,
-          description: this.newEvaluation.description,
+          desc: this.newEvaluation.desc,
           startDate: this.newEvaluation.startDate,
           endDate: this.newEvaluation.endDate,
         };
@@ -157,9 +157,9 @@ Vue.component("modal-create-evaluation", {
       console.log(updated);
       try {
         await this.apiRequest(
-            "http://localhost:28635/api/evaluation",
-            updated.id ? "PUT" : "POST",
-            updated
+          "http://localhost:28635/api/evaluation",
+          updated.id ? "PUT" : "POST",
+          updated
         );
       } catch (error) {
         console.error("Error saving evoluation:", error);

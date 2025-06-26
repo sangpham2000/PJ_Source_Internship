@@ -63,8 +63,4 @@
     <_ContentIncludedByDefault Remove="wwwroot\js\CNTT2\components\common\ModalConfirmDelete.js" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\js\CNTT2\components\" />
-  </ItemGroup>
-
 </Project>

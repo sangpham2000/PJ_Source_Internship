@@ -1,5 +1,10 @@
 Vue.component("column-list", {
   props: ["columns", "tableIndex"],
+  data() {
+    return {
+      columnTypes: ["Text", "Number", "Date"], // Available column types
+    };
+  },
   mounted() {
     const self = this;
     new Sortable(this.$refs.sortable, {
@@ -25,6 +30,9 @@ Vue.component("column-list", {
         });
       }
     },
+    getColumns(type) {
+      return this.columnTypes[type];
+    }
   },
   template: `
     <div class="col-md-12">
@@ -40,7 +48,8 @@ Vue.component("column-list", {
             <div v-for="(column, columnIndex) in columns" :key="columnIndex" class="column-item">
               <div class="row">
                 <div class="col-xs-1"><i class="fa fa-bars"></i></div>
-                <div class="col-xs-7"><strong>{{ column.name }}</strong></div>
+                <div class="col-xs-6"><strong>{{ column.name }}</strong></div>
+                <div class="col-xs-1"><strong>{{ getColumns(column.type) }}</strong></div>
                 <div class="col-xs-4 text-right">
                   <button
                     class="btn btn-xs btn-primary"

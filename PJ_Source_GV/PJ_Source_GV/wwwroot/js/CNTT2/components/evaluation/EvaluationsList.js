@@ -34,7 +34,8 @@ Vue.component("evaluations-list", {
             </div>
             <div class="panel-body">
               <p><strong>ID:</strong> DG{{ evaluation.id }}</p>
-              <strong>Thời gian:</strong> {{ formatDate(evaluation.startDate) }} - {{ formatDate(evaluation.endDate) }}
+              <p><strong>Thời gian:</strong> {{ formatDate(evaluation.startDate) }} - {{ formatDate(evaluation.endDate) }}</p>
+              <p><strong>Mô tả:</strong> {{ evaluation.desc }}</p>
             </div>
             <div class="panel-footer">
               <button class="btn btn-sm btn-primary" @click="onEdit(evaluation)">
@@ -139,8 +140,8 @@ Vue.component("evaluations-list", {
           params.append("name", name.trim());
         }
         const response = await this.apiRequest(
-            `http://localhost:28635/API/evaluation?${params.toString()}`,
-            "GET"
+          `http://localhost:28635/API/evaluation?${params.toString()}`,
+          "GET"
         );
         this.evaluations = [...response.items];
         // this.currentPageValue = response.page;

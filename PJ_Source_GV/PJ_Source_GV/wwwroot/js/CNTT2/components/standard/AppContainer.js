@@ -91,7 +91,11 @@ Vue.component("app-container", {
       this.searchQuery = searchValue;
       clearTimeout(this.searchTimer);
       this.searchTimer = setTimeout(() => {
-        this.fetchStandards(this.currentPageValue, this.itemsPerPage, this.searchQuery);
+        this.fetchStandards(
+          this.currentPageValue,
+          this.itemsPerPage,
+          this.searchQuery
+        );
       }, 500);
     },
     async fetchStandards(page = 1, pageSize = 10, name = "") {
@@ -109,8 +113,8 @@ Vue.component("app-container", {
         }
 
         const response = await this.apiRequest(
-            `http://localhost:28635/API/standard?${params.toString()}`,
-            "GET"
+          `http://localhost:28635/API/standard?${params.toString()}`,
+          "GET"
         );
 
         // Update data with paginated response
@@ -169,9 +173,9 @@ Vue.component("app-container", {
     async saveStandard(updated) {
       try {
         const savedStandard = await this.apiRequest(
-            "http://localhost:28635/api/standard",
-            updated.id ? "PUT" : "POST",
-            updated
+          "http://localhost:28635/api/standard",
+          updated.id ? "PUT" : "POST",
+          updated
         );
         const idx = this.standards.findIndex((s) => s.id === updated.id);
         if (idx >= 0) {
@@ -188,8 +192,8 @@ Vue.component("app-container", {
     async removeStandard(standard) {
       try {
         await this.apiRequest(
-            `http://localhost:28635/api/standard/${standard.id}`,
-            "DELETE"
+          `http://localhost:28635/api/standard/${standard.id}`,
+          "DELETE"
         );
         this.fetchStandards();
       } catch (error) {
@@ -206,6 +210,7 @@ Vue.component("app-container", {
         tableIndex,
         columnIndex,
         name: col.name,
+        type: col.type,
         isNew: false,
       };
       this.showModal = "edit-column";
@@ -217,11 +222,15 @@ Vue.component("app-container", {
       if (col.isNew) {
         this.currentStandard.tables[col.tableIndex].columns.push({
           name: col.name,
+          type: col.type,
         });
       } else {
         this.currentStandard.tables[col.tableIndex].columns[
-            col.columnIndex
-            ].name = col.name;
+          col.columnIndex
+        ].name = col.name;
+        this.currentStandard.tables[col.tableIndex].columns[
+          col.columnIndex
+        ].type = col.type;
       }
       this.showModal = null;
     },

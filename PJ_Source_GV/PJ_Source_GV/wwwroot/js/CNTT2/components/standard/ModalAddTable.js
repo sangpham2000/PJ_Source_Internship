@@ -5,6 +5,7 @@ Vue.component("modal-add-table", {
       columns: [],
       columnCount: 3,
       errors: { name: "", columns: "" },
+      columnTypes: ["Text", "Number", "Date"], // Available column types
     };
   },
   methods: {
@@ -19,15 +20,29 @@ Vue.component("modal-add-table", {
         this.errors.columns = "Vui lòng thêm ít nhất một cột.";
         isValid = false;
       }
+      // Validate each column has a name and type
+      this.columns.forEach((column, index) => {
+        if (!column.name) {
+          this.errors.columns = `Vui lòng nhập tên cho cột ${index + 1}.`;
+          isValid = false;
+        }
+        if (!column.type && column.type !== 0) {
+          this.errors.columns = `Vui lòng chọn kiểu dữ liệu cho cột ${
+            index + 1
+          }.`;
+          isValid = false;
+        }
+      });
       return isValid;
     },
     generateColumns() {
       this.columns = Array.from({ length: this.columnCount }, (_, i) => ({
         name: "Cột " + (i + 1),
+        type: 0, // Default type
       }));
     },
     addColumn() {
-      this.columns.push({ name: "" });
+      this.columns.push({ name: "", type: 0 });
     },
     removeColumn(index) {
       if (window.confirm("Bạn có chắc muốn xóa cột này?")) {
@@ -47,7 +62,7 @@ Vue.component("modal-add-table", {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <button class="close" @click="$emit('cancel')"><span>&times;</span></button>
+            <button class="close" @click="$emit('cancel')"><span>×</span></button>
             <h4 class="modal-title">Thêm bảng mới</h4>
           </div>
           <div class="modal-body">
@@ -97,23 +112,33 @@ Vue.component("modal-add-table", {
                 class="form-group"
                 v-for="(column, index) in columns"
               >
-                <div class="input-group">
-                  <span class="input-group-addon">{{ index + 1 }}</span>
-                  <input
-                    :placeholder="'Tên cột ' + (index + 1)"
-                    class="form-control"
-                    type="text"
-                    v-model="column.name"
-                  />
-                  <span class="input-group-btn">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="input-group">
+                      <span class="input-group-addon">{{ index + 1 }}</span>
+                      <input
+                        :placeholder="'Tên cột ' + (index + 1)"
+                        class="form-control"
+                        type="text"
+                        v-model="column.name"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <select class="form-control" v-model="column.type">
+                      <option value="" disabled>Chọn kiểu dữ liệu</option>
+                      <option v-for="(type, idx) in columnTypes" :value="idx">{{ type }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
                     <button
                       @click="removeColumn(index)"
-                      class="btn btn-danger"
+                      class="btn btn-danger btn-block"
                       type="button"
                     >
                       <i class="fa fa-trash"></i>
                     </button>
-                  </span>
+                  </div>
                 </div>
               </div>
               <button @click="addColumn" class="btn btn-sm btn-success">

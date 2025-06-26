@@ -211,7 +211,7 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   border: none;
   overflow: auto;
-  max-height: 95vh;;
+  max-height: 75vh;;
 }
 
 .modal-header {

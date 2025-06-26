@@ -5,6 +5,7 @@ Vue.component("app-container", {
         v-if="currentPage === 'evaluations-list'"
         @create="showCreateEvaluationModal"
         @edit="editEvaluation"
+        ref="evaluationsList"
       />
       <modal-create-evaluation
         v-if="showModal === 'create-evaluation'"
@@ -55,7 +56,7 @@ Vue.component("app-container", {
     },
     onCreatedNewEvaluation() {
       this.hideModal();
-      this.fetchEvaluations();
+      this.$refs.evaluationsList.fetchEvaluations();
     },
   },
 });

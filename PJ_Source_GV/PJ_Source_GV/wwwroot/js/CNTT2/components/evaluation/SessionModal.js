@@ -82,21 +82,21 @@ Vue.component("session-modal", {
 
                         <!-- Department Assignment Section -->
                         <div class="form-group">
-                            <label>Phân công khoa và người đánh giá <span style="color: #ef4444">*</span></label>
+                            <label>Phân công phòng ban và người đánh giá <span style="color: #ef4444">*</span></label>
                             <div class="panel panel-default">
                                 <div class="panel-body">
                                     <!-- Department Selection -->
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="form-group" :class="{ 'has-error': errors.selectedDepartment }">
-                                                <label for="departmentSelect">Chọn khoa</label>
+                                                <label for="departmentSelect">Chọn phòng ban</label>
                                                 <select 
                                                     class="form-control" 
                                                     id="departmentSelect" 
                                                     v-model="selectedDepartment"
                                                     @change="addDepartment"
                                                 >
-                                                    <option value="">-- Chọn khoa --</option>
+                                                    <option value="">-- Chọn phòng ban --</option>
                                                     <option 
                                                         v-for="dept in availableDepartments" 
                                                         :key="dept.id" 
@@ -112,7 +112,7 @@ Vue.component("session-modal", {
 
                                     <!-- Assigned Departments List -->
                                     <div v-if="newSession.assignedDepartments.length > 0">
-                                        <h5>Khoa được phân công:</h5>
+                                        <h5>Phòng được phân công:</h5>
                                         <div class="assigned-departments">
                                             <div 
                                                 v-for="assignedDept in newSession.assignedDepartments" 
@@ -125,7 +125,7 @@ Vue.component("session-modal", {
                                                         <div class="col-md-10">
                                                             <strong>{{ getDepartmentName(assignedDept.departmentId) }}</strong>
                                                             <span class="badge" style="margin-left: 10px;">
-                                                                {{ assignedDept.staffIds.length }} giảng viên
+                                                                {{ assignedDept.staffIds.length }} người đánh giá
                                                             </span>
                                                         </div>
                                                         <div class="col-md-2 text-right">
@@ -143,13 +143,13 @@ Vue.component("session-modal", {
                                                     <!-- Staff Selection for this department -->
                                                     <div class="row">
                                                         <div class="col-md-12">
-                                                            <label>Chọn giảng viên:</label>
+                                                            <label>Chọn người đánh giá:</label>
                                                             <select 
                                                                 class="form-control" 
                                                                 v-model="assignedDept.selectedStaffId"
                                                                 @change="addStaffToDepartment(assignedDept.departmentId)"
                                                             >
-                                                                <option value="">-- Chọn giảng viên --</option>
+                                                                <option value="">-- Chọn người đánh giá --</option>
                                                                 <option 
                                                                     v-for="staff in getAvailableStaff(assignedDept.departmentId, assignedDept.staffIds)" 
                                                                     :key="staff.id" 
@@ -163,7 +163,7 @@ Vue.component("session-modal", {
 
                                                     <!-- Assigned Staff List -->
                                                     <div v-if="assignedDept.staffIds.length > 0" style="margin-top: 15px;">
-                                                        <label>Giảng viên được chọn:</label>
+                                                        <label>Người được phân công:</label>
                                                         <div class="assigned-staff">
                                                             <span 
                                                                 v-for="staffId in assignedDept.staffIds" 
@@ -382,17 +382,17 @@ Vue.component("session-modal", {
     filteredStandards() {
       if (!this.searchTerm) return this.standards;
       return this.standards.filter(
-          (standard) =>
-              standard.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-              (standard.description &&
-                  standard.description
-                      .toLowerCase()
-                      .includes(this.searchTerm.toLowerCase()))
+        (standard) =>
+          standard.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          (standard.description &&
+            standard.description
+              .toLowerCase()
+              .includes(this.searchTerm.toLowerCase()))
       );
     },
     availableDepartments() {
       const assignedIds = this.newSession.assignedDepartments.map(
-          (d) => d.departmentId
+        (d) => d.departmentId
       );
       return this.departments.filter((dept) => !assignedIds.includes(dept.id));
     },
@@ -435,8 +435,8 @@ Vue.component("session-modal", {
         }
 
         const response = await this.apiRequest(
-            `http://localhost:28635/API/standard?${params.toString()}`,
-            "GET"
+          `http://localhost:28635/API/standard?${params.toString()}`,
+          "GET"
         );
         this.standards = [...response.items];
         console.log("Standards fetched:", response.items);
@@ -451,7 +451,7 @@ Vue.component("session-modal", {
 
       // Check if department already assigned (shouldn't happen with computed property)
       const existingDept = this.newSession.assignedDepartments.find(
-          (dept) => dept.departmentId === parseInt(this.selectedDepartment)
+        (dept) => dept.departmentId === parseInt(this.selectedDepartment)
       );
 
       if (existingDept) {
@@ -470,14 +470,14 @@ Vue.component("session-modal", {
 
     removeDepartment(departmentId) {
       this.newSession.assignedDepartments =
-          this.newSession.assignedDepartments.filter(
-              (dept) => dept.departmentId !== departmentId
-          );
+        this.newSession.assignedDepartments.filter(
+          (dept) => dept.departmentId !== departmentId
+        );
     },
 
     addStaffToDepartment(departmentId) {
       const department = this.newSession.assignedDepartments.find(
-          (dept) => dept.departmentId === departmentId
+        (dept) => dept.departmentId === departmentId
       );
 
       if (!department || !department.selectedStaffId) return;
@@ -495,12 +495,12 @@ Vue.component("session-modal", {
 
     removeStaffFromDepartment(departmentId, staffId) {
       const department = this.newSession.assignedDepartments.find(
-          (dept) => dept.departmentId === departmentId
+        (dept) => dept.departmentId === departmentId
       );
 
       if (department) {
         department.staffIds = department.staffIds.filter(
-            (id) => id !== staffId
+          (id) => id !== staffId
         );
       }
     },
@@ -517,8 +517,8 @@ Vue.component("session-modal", {
 
     getAvailableStaff(departmentId, assignedStaffIds) {
       return this.staff.filter(
-          (s) =>
-              s.departmentId === departmentId && !assignedStaffIds.includes(s.id)
+        (s) =>
+          s.departmentId === departmentId && !assignedStaffIds.includes(s.id)
       );
     },
 
@@ -542,13 +542,13 @@ Vue.component("session-modal", {
 
         // Check if all departments have at least one staff assigned
         const departmentsWithoutStaff =
-            this.newSession.assignedDepartments.filter(
-                (dept) => dept.staffIds.length === 0
-            );
+          this.newSession.assignedDepartments.filter(
+            (dept) => dept.staffIds.length === 0
+          );
 
         if (departmentsWithoutStaff.length > 0) {
           this.errors.assignedDepartments =
-              "Mỗi khoa phải có ít nhất một giảng viên được chọn";
+            "Mỗi khoa phải có ít nhất một giảng viên được chọn";
           return;
         }
 
@@ -562,16 +562,16 @@ Vue.component("session-modal", {
           desc: this.newSession.desc || null,
           standardIds: this.newSession.selectedStandardIds,
           assignedDepartments: JSON.stringify(
-              this.newSession.assignedDepartments
+            this.newSession.assignedDepartments
           ),
         };
 
         // console.log("sessionData", sessionData);
         // return;
         await this.apiRequest(
-            "http://localhost:28635/API/evaluation/session",
-            "POST",
-            sessionData
+          "http://localhost:28635/API/evaluation/session",
+          "POST",
+          sessionData
         );
 
         toastr.success("Đã tạo phiên đánh giá mới!");
